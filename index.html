@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>小学华文识读字查询系统</title>
   <style>
+    /* 本地楷体字体声明：只要根目录有名为 kaiti.woff2、kaiti.woff、kaiti.ttf 或 kaiti.otf 的文件即可自动加载 */
+    @font-face {
+      font-family: 'LocalKaiti';
+      src: url('kaiti.woff2') format('woff2'),
+           url('kaiti.woff') format('woff'),
+           url('kaiti.ttf') format('truetype'),
+           url('kaiti.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
@@ -16,6 +28,8 @@
       --border: #cbd5e1;
       --badge-grade-bg: #fef3c7;
       --badge-grade-color: #92400e;
+      --badge-poly-bg: #f3e8ff;
+      --badge-poly-color: #6b21a8;
     }
 
     * {
@@ -53,6 +67,7 @@
       font-size: 14px;
     }
 
+    /* 状态提示条（支持本地直接双击打开时的安全限制备用导入） */
     .notice-bar {
       display: none;
       background: #fffbeb;
@@ -87,6 +102,7 @@
       background: #d97706;
     }
 
+    /* 筛选区域 */
     .filter-card {
       background: var(--card-bg);
       border-radius: 12px;
@@ -191,6 +207,7 @@
       background: #e2e8f0;
     }
 
+    /* 汉字卡片列表 */
     .results-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -247,9 +264,10 @@
       font-weight: 500;
     }
 
+    /* 正字字体：优先根目录本地楷体，次选系统原生正楷，降级使用标准黑体（不出现仿宋或宋体） */
     .char-main {
       font-size: 38px;
-      font-family: "Kaiti", "STKaiti", "楷体", "Songti SC", serif;
+      font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
       font-weight: 600;
       color: #0f172a;
       line-height: 1.2;
@@ -285,6 +303,7 @@
       font-size: 16px;
     }
 
+    /* 详情弹窗 */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -346,7 +365,7 @@
 
     .modal-char-big {
       font-size: 72px;
-      font-family: "Kaiti", "STKaiti", "楷体", "Songti SC", serif;
+      font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
       line-height: 1;
       margin: 8px 0;
       color: #0f172a;
@@ -520,16 +539,19 @@ const noticeBar = document.getElementById('noticeBar');
 const modal = document.getElementById('charModal');
 const modalClose = document.getElementById('modalClose');
 
+// 去除声调
 function getPinyinPlain(py) {
   if (!py) return '';
   return py.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
+// 提取声母/首字母
 function getInitial(py) {
   const plain = getPinyinPlain(py);
   return plain ? plain.charAt(0).toUpperCase() : '';
 }
 
+// 解析CSV（兼容多拼音列与复合拼音格式）
 function parseCSV(text) {
   if (text.charCodeAt(0) === 0xFEFF) {
     text = text.slice(1);
@@ -579,6 +601,7 @@ function parseCSV(text) {
     const char = colIndex.char !== -1 ? (row[colIndex.char] || '') : '';
     if (!char) continue;
 
+    // 收集所有拼音
     const pinyins = [];
     pinyinColIndices.forEach(idx => {
       const val = row[idx];
