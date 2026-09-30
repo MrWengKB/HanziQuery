@@ -1,0 +1,398 @@
+/* 本地楷体字体声明 */
+@font-face {
+  font-family: 'LocalKaiti';
+  src: url('kaiti.woff2') format('woff2'),
+       url('kaiti.woff') format('woff'),
+       url('kaiti.ttf') format('truetype'),
+       url('kaiti.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --badge-grade-bg: #fef3c7;
+  --badge-grade-color: #92400e;
+  --badge-poly-bg: #f3e8ff;
+  --badge-poly-color: #6b21a8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  padding: 24px 16px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 26px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* 状态提示条 */
+.notice-bar {
+  display: none;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.notice-bar.active {
+  display: flex;
+}
+
+.notice-btn {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.notice-btn:hover {
+  background: #d97706;
+}
+
+/* 筛选区域 */
+.filter-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.search-row {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 11px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 9px 30px 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+}
+
+.filter-group select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.stats {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.stats span {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.reset-btn {
+  padding: 8px 18px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.reset-btn:hover {
+  background: #e2e8f0;
+}
+
+/* 汉字卡片列表 */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.char-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.char-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 11px;
+}
+
+.char-id {
+  color: #94a3b8;
+}
+
+.char-grade-badge {
+  background: var(--badge-grade-bg);
+  color: var(--badge-grade-color);
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.char-py {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+  font-weight: 500;
+}
+
+.char-main {
+  font-size: 38px;
+  font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.2;
+  margin: 2px 0 6px;
+}
+
+.char-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-primary {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 16px;
+  color: var(--text-muted);
+  grid-column: 1 / -1;
+  font-size: 16px;
+}
+
+/* 详情弹窗 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modal-char-view {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-char-big {
+  font-size: 72px;
+  font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1;
+  margin: 8px 0;
+  color: #0f172a;
+}
+
+.modal-pinyin {
+  font-size: 22px;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.modal-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
