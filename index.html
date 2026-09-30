@@ -17,57 +17,374 @@
       --badge-grade-bg: #fef3c7;
       --badge-grade-color: #92400e;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 24px 16px; line-height: 1.5; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 20px; }
-    header h1 { font-size: 26px; color: #0f172a; margin-bottom: 8px; }
-    header p { color: var(--text-muted); font-size: 14px; }
-    .notice-bar { display: none; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    .notice-bar.active { display: flex; }
-    .notice-btn { background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; font-weight: 500; }
-    .filter-card { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06); border: 1px solid var(--border); margin-bottom: 24px; }
-    .search-row { margin-bottom: 16px; }
-    .search-input { width: 100%; padding: 11px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; background: #fff; }
-    .search-input:focus { border-color: var(--primary); }
-    .filters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .filter-group label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
-    .filter-group select {
-      width: 100%; padding: 9px 30px 9px 12px; border: 1.5px solid var(--border); border-radius: 8px;
-      background-color: #fff; font-size: 14px; color: #0f172a; cursor: pointer; outline: none;
-      -webkit-appearance: none; appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 10px center; background-size: 16px 16px;
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     }
-    .filter-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
-    .btn-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 14px; border-top: 1px dashed var(--border); }
-    .stats { font-size: 14px; color: var(--text-muted); }
-    .stats span { font-weight: 700; color: var(--primary); }
-    .reset-btn { padding: 8px 18px; background: #f1f5f9; color: #334155; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .reset-btn:hover { background: #e2e8f0; }
-    .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
-    .char-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 8px; text-align: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; }
-    .char-card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px -4px rgba(0,0,0,0.08); border-color: var(--primary); }
-    .card-top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; font-size: 11px; }
-    .char-id { color: #94a3b8; }
-    .char-grade-badge { background: var(--badge-grade-bg); color: var(--badge-grade-color); font-weight: 700; padding: 1px 5px; border-radius: 4px; font-size: 10px; }
-    .char-py { font-size: 13px; color: #64748b; margin-top: 2px; }
-    .char-main { font-size: 38px; font-family: "Kaiti", "STKaiti", "楷体", serif; font-weight: 600; color: #0f172a; line-height: 1.2; margin: 2px 0 6px; }
-    .char-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
-    .badge { font-size: 11px; padding: 2px 5px; border-radius: 4px; background: #f1f5f9; color: #475569; }
-    .badge-primary { background: var(--primary-light); color: var(--primary); font-weight: 500; }
-    .empty-state { text-align: center; padding: 60px 16px; color: var(--text-muted); grid-column: 1 / -1; font-size: 16px; }
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.active { display: flex; }
-    .modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; padding: 24px; position: relative; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); animation: popIn 0.2s cubic-bezier(0.16,1,0.3,1); }
-    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .modal-close { position: absolute; top: 14px; right: 14px; background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; color: #64748b; display: flex; align-items: center; justify-content: center; }
-    .modal-char-big { font-size: 72px; font-family: "Kaiti", "楷体", serif; text-align: center; margin: 8px 0; color: #0f172a; }
-    .modal-pinyin { font-size: 22px; color: var(--primary); font-weight: 600; text-align: center; }
-    .modal-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
-    .detail-item { display: flex; flex-direction: column; }
-    .detail-label { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
-    .detail-value { font-size: 15px; font-weight: 600; color: var(--text); }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 26px;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .notice-bar {
+      display: none;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .notice-bar.active {
+      display: flex;
+    }
+
+    .notice-btn {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .notice-btn:hover {
+      background: #d97706;
+    }
+
+    .filter-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .search-row {
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 11px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fff;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .filter-group select {
+      width: 100%;
+      padding: 9px 30px 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background-color: #ffffff;
+      font-size: 14px;
+      color: #0f172a;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px 16px;
+    }
+
+    .filter-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .stats {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .stats span {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .reset-btn {
+      padding: 8px 18px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .reset-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 14px;
+    }
+
+    .char-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      position: relative;
+    }
+
+    .char-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+      border-color: var(--primary);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      font-size: 11px;
+    }
+
+    .char-id {
+      color: #94a3b8;
+    }
+
+    .char-grade-badge {
+      background: var(--badge-grade-bg);
+      color: var(--badge-grade-color);
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    .char-py {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 2px;
+      min-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+      font-weight: 500;
+    }
+
+    .char-main {
+      font-size: 38px;
+      font-family: "Kaiti", "STKaiti", "楷体", "Songti SC", serif;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.2;
+      margin: 2px 0 6px;
+    }
+
+    .char-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .badge-primary {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 16px;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+      font-size: 16px;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .modal-char-view {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-char-big {
+      font-size: 72px;
+      font-family: "Kaiti", "STKaiti", "楷体", "Songti SC", serif;
+      line-height: 1;
+      margin: 8px 0;
+      color: #0f172a;
+    }
+
+    .modal-pinyin {
+      font-size: 22px;
+      color: var(--primary);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -75,31 +392,68 @@
 <div class="container">
   <header>
     <h1>小学华文识读字查询系统</h1>
-    <p>动态读取同目录 <code>hanzilist.csv</code>，支持多学年、课次、拼音、部首、结构综合筛选</p>
+    <p>动态读取同目录 <code>hanzilist.csv</code>，支持多音字多拼音展示、多字母智能筛选与综合检索</p>
   </header>
 
   <div class="notice-bar" id="noticeBar">
-    <span>提示：若直接双击HTML打开受浏览器安全限制未能自动读取CSV，可点右侧手动选择同目录下的 hanzilist.csv：</span>
+    <span id="noticeMsg">提示：若直接双击HTML打开受浏览器安全限制未能自动读取CSV，可点右侧手动指定同目录下的 hanzilist.csv：</span>
     <button class="notice-btn" onclick="document.getElementById('csvFileInput').click()">选择 hanzilist.csv</button>
     <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleFileSelect(event)">
   </div>
 
   <div class="filter-card">
     <div class="search-row">
-      <input type="text" id="searchInput" class="search-input" placeholder="输入汉字或拼音搜索 (如: 回、国、er、tian)..." autocomplete="off">
+      <input type="text" id="searchInput" class="search-input" placeholder="输入汉字或任一拼音搜索 (如: 长、chang、zhang、er)..." autocomplete="off">
     </div>
 
     <div class="filters-grid">
-      <div class="filter-group"><label for="gradeFilter">年级</label><select id="gradeFilter"><option value="">全部年级</option></select></div>
-      <div class="filter-group"><label for="lessonFilter">课次</label><select id="lessonFilter"><option value="">全部课次</option></select></div>
-      <div class="filter-group"><label for="structFilter">汉字结构</label><select id="structFilter"><option value="">全部结构</option></select></div>
-      <div class="filter-group"><label for="initialFilter">拼音首字母</label><select id="initialFilter"><option value="">全部首字母 (A-Z)</option></select></div>
-      <div class="filter-group"><label for="radicalFilter">部首</label><select id="radicalFilter"><option value="">全部部首</option></select></div>
-      <div class="filter-group"><label for="strokeFilter">笔画数</label><select id="strokeFilter"><option value="">全部笔画</option></select></div>
+      <div class="filter-group">
+        <label for="gradeFilter">年级</label>
+        <select id="gradeFilter">
+          <option value="">全部年级</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="lessonFilter">课次</label>
+        <select id="lessonFilter">
+          <option value="">全部课次</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="structFilter">汉字结构</label>
+        <select id="structFilter">
+          <option value="">全部结构</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="initialFilter">拼音首字母</label>
+        <select id="initialFilter">
+          <option value="">全部首字母 (A-Z)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="radicalFilter">部首</label>
+        <select id="radicalFilter">
+          <option value="">全部部首</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="strokeFilter">笔画数</label>
+        <select id="strokeFilter">
+          <option value="">全部笔画</option>
+        </select>
+      </div>
     </div>
 
     <div class="btn-row">
-      <div class="stats">共找到 <span id="matchCount">0</span> 个生字（总库 <span id="totalCount">0</span> 字）</div>
+      <div class="stats">
+        共找到 <span id="matchCount">0</span> 个生字（总库 <span id="totalCount">0</span> 字）
+      </div>
       <button class="reset-btn" id="resetBtn" type="button">重置所有筛选</button>
     </div>
   </div>
@@ -110,22 +464,46 @@
 <div class="modal-overlay" id="charModal">
   <div class="modal-content">
     <button class="modal-close" id="modalClose">&times;</button>
-    <div class="modal-pinyin" id="modalPinyin"></div>
-    <div class="modal-char-big" id="modalChar"></div>
+    <div class="modal-char-view">
+      <div class="modal-pinyin" id="modalPinyin"></div>
+      <div class="modal-char-big" id="modalChar"></div>
+    </div>
     <div class="modal-details">
-      <div class="detail-item"><span class="detail-label">字表序号</span><span class="detail-value" id="modalId"></span></div>
-      <div class="detail-item"><span class="detail-label">年级</span><span class="detail-value" id="modalGrade"></span></div>
-      <div class="detail-item"><span class="detail-label">课次</span><span class="detail-value" id="modalLesson"></span></div>
-      <div class="detail-item"><span class="detail-label">汉字结构</span><span class="detail-value" id="modalStruct"></span></div>
-      <div class="detail-item"><span class="detail-label">部首</span><span class="detail-value" id="modalRadical"></span></div>
-      <div class="detail-item"><span class="detail-label">笔画数</span><span class="detail-value" id="modalStrokes"></span></div>
-      <div class="detail-item"><span class="detail-label">拼音字母</span><span class="detail-value" id="modalInitial"></span></div>
+      <div class="detail-item">
+        <span class="detail-label">字表序号</span>
+        <span class="detail-value" id="modalId"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">年级</span>
+        <span class="detail-value" id="modalGrade"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">课次</span>
+        <span class="detail-value" id="modalLesson"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">汉字结构</span>
+        <span class="detail-value" id="modalStruct"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">部首</span>
+        <span class="detail-value" id="modalRadical"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">笔画数</span>
+        <span class="detail-value" id="modalStrokes"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">拼音字母</span>
+        <span class="detail-value" id="modalInitial"></span>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 let DATA = [];
+
 const searchInput = document.getElementById('searchInput');
 const gradeFilter = document.getElementById('gradeFilter');
 const lessonFilter = document.getElementById('lessonFilter');
@@ -138,33 +516,45 @@ const charGrid = document.getElementById('charGrid');
 const matchCount = document.getElementById('matchCount');
 const totalCount = document.getElementById('totalCount');
 const noticeBar = document.getElementById('noticeBar');
+
 const modal = document.getElementById('charModal');
 const modalClose = document.getElementById('modalClose');
 
 function getPinyinPlain(py) {
-  return py ? py.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+  if (!py) return '';
+  return py.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
+
 function getInitial(py) {
   const plain = getPinyinPlain(py);
   return plain ? plain.charAt(0).toUpperCase() : '';
 }
 
 function parseCSV(text) {
-  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
   const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
   if (lines.length < 2) return [];
 
   const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+  
   const colIndex = {
     id: headers.findIndex(h => h.includes('序号')),
     grade: headers.findIndex(h => h.includes('年级')),
     char: headers.findIndex(h => h.includes('生字') || h.includes('字')),
-    pinyin: headers.findIndex(h => h.includes('拼音')),
     radical: headers.findIndex(h => h.includes('部首')),
     strokes: headers.findIndex(h => h.includes('笔画')),
     structure: headers.findIndex(h => h.includes('结构')),
     lesson: headers.findIndex(h => h.includes('课次') || h.includes('课'))
   };
+
+  const pinyinColIndices = [];
+  headers.forEach((h, idx) => {
+    if (h.includes('拼音')) {
+      pinyinColIndices.push(idx);
+    }
+  });
 
   const list = [];
   for (let i = 1; i < lines.length; i++) {
@@ -173,31 +563,53 @@ function parseCSV(text) {
     let field = '';
     for (let j = 0; j < lines[i].length; j++) {
       const c = lines[i][j];
-      if (c === '"') insideQuotes = !insideQuotes;
-      else if (c === ',' && !insideQuotes) {
+      if (c === '"') {
+        insideQuotes = !insideQuotes;
+      } else if (c === ',' && !insideQuotes) {
         row.push(field.trim().replace(/^["']|["']$/g, ''));
         field = '';
-      } else field += c;
+      } else {
+        field += c;
+      }
     }
     row.push(field.trim().replace(/^["']|["']$/g, ''));
+
     if (row.length < 3) continue;
 
-    const char = row[colIndex.char] || '';
+    const char = colIndex.char !== -1 ? (row[colIndex.char] || '') : '';
     if (!char) continue;
-    const pinyin = row[colIndex.pinyin] || '';
+
+    const pinyins = [];
+    pinyinColIndices.forEach(idx => {
+      const val = row[idx];
+      if (val) {
+        const subs = val.split(/[/、,，;；\s]+/).map(s => s.trim()).filter(Boolean);
+        subs.forEach(s => {
+          if (!pinyins.includes(s)) {
+            pinyins.push(s);
+          }
+        });
+      }
+    });
+
+    const pinyinDisplay = pinyins.join(' / ');
+    const initials = [...new Set(pinyins.map(p => getInitial(p)).filter(Boolean))];
+    const pinyinPlains = pinyins.map(p => getPinyinPlain(p));
     const strokesVal = parseInt(row[colIndex.strokes], 10);
 
     list.push({
       id: colIndex.id !== -1 ? (parseInt(row[colIndex.id], 10) || i) : i,
       grade: colIndex.grade !== -1 ? (row[colIndex.grade] || 'P1') : 'P1',
       char: char,
-      pinyin: pinyin,
+      pinyins: pinyins,
+      pinyin_display: pinyinDisplay,
+      pinyin_plains: pinyinPlains,
+      initials: initials,
+      initial_display: initials.join(' / '),
       radical: colIndex.radical !== -1 ? (row[colIndex.radical] || '') : '',
       strokes: isNaN(strokesVal) ? 0 : strokesVal,
       structure: colIndex.structure !== -1 ? (row[colIndex.structure] || '') : '',
-      lesson: colIndex.lesson !== -1 ? (row[colIndex.lesson] || '') : '',
-      initial: getInitial(pinyin),
-      pinyin_plain: getPinyinPlain(pinyin)
+      lesson: colIndex.lesson !== -1 ? (row[colIndex.lesson] || '') : ''
     });
   }
   return list;
@@ -216,13 +628,13 @@ function populateSelect(selectEl, values, defaultLabel, formatter = v => v) {
 
 function initFilters() {
   totalCount.textContent = DATA.length;
+
   const grades = [...new Set(DATA.map(d => d.grade).filter(Boolean))].sort();
   populateSelect(gradeFilter, grades, '全部年级');
 
-  const orderMap = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20};
   const lessons = [...new Set(DATA.map(d => d.lesson).filter(Boolean))].sort((a, b) => {
-    const numA = orderMap[a.replace('第', '').replace('课', '')] || parseInt(a.replace(/\D/g, '')) || 99;
-    const numB = orderMap[b.replace('第', '').replace('课', '')] || parseInt(b.replace(/\D/g, '')) || 99;
+    const numA = parseInt(a.replace(/\D/g, '')) || 0;
+    const numB = parseInt(b.replace(/\D/g, '')) || 0;
     return numA - numB;
   });
   populateSelect(lessonFilter, lessons, '全部课次');
@@ -230,7 +642,11 @@ function initFilters() {
   const structs = [...new Set(DATA.map(d => d.structure).filter(Boolean))].sort();
   populateSelect(structFilter, structs, '全部结构');
 
-  const initials = [...new Set(DATA.map(d => d.initial).filter(Boolean))].sort();
+  const allInitials = new Set();
+  DATA.forEach(d => {
+    d.initials.forEach(init => allInitials.add(init));
+  });
+  const initials = [...allInitials].sort();
   populateSelect(initialFilter, initials, '全部首字母 (A-Z)');
 
   const radicals = [...new Set(DATA.map(d => d.radical).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh'));
@@ -252,14 +668,14 @@ function renderList() {
   const filtered = DATA.filter(item => {
     if (query) {
       const matchChar = item.char.includes(query);
-      const matchPy = item.pinyin.toLowerCase().includes(query);
-      const matchPlain = item.pinyin_plain.includes(query);
+      const matchPy = item.pinyins.some(p => p.toLowerCase().includes(query));
+      const matchPlain = item.pinyin_plains.some(p => p.includes(query));
       if (!matchChar && !matchPy && !matchPlain) return false;
     }
     if (grade && item.grade !== grade) return false;
     if (lesson && item.lesson !== lesson) return false;
     if (struct && item.structure !== struct) return false;
-    if (initial && item.initial !== initial) return false;
+    if (initial && !item.initials.includes(initial)) return false;
     if (radical && item.radical !== radical) return false;
     if (stroke && item.strokes !== parseInt(stroke, 10)) return false;
     return true;
@@ -278,7 +694,7 @@ function renderList() {
         <span class="char-id">#${item.id}</span>
         <span class="char-grade-badge">${item.grade}</span>
       </div>
-      <div class="char-py">${item.pinyin}</div>
+      <div class="char-py">${item.pinyin_display}</div>
       <div class="char-main">${item.char}</div>
       <div class="char-tags">
         <span class="badge badge-primary">${item.structure}</span>
@@ -293,20 +709,25 @@ function openModal(id) {
   const item = DATA.find(d => d.id === id);
   if (!item) return;
   document.getElementById('modalChar').textContent = item.char;
-  document.getElementById('modalPinyin').textContent = item.pinyin;
+  document.getElementById('modalPinyin').textContent = item.pinyin_display;
   document.getElementById('modalId').textContent = '#' + item.id;
   document.getElementById('modalGrade').textContent = item.grade;
   document.getElementById('modalLesson').textContent = item.lesson;
   document.getElementById('modalStruct').textContent = item.structure;
   document.getElementById('modalRadical').textContent = item.radical + ' 部';
   document.getElementById('modalStrokes').textContent = item.strokes + ' 画';
-  document.getElementById('modalInitial').textContent = item.initial;
+  document.getElementById('modalInitial').textContent = item.initial_display;
   modal.classList.add('active');
 }
 
-function closeModal() { modal.classList.remove('active'); }
+function closeModal() {
+  modal.classList.remove('active');
+}
+
 modalClose.addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
 
 [searchInput, gradeFilter, lessonFilter, structFilter, initialFilter, radicalFilter, strokeFilter].forEach(el => {
   el.addEventListener('input', renderList);
@@ -348,7 +769,7 @@ fetch('hanzilist.csv')
     renderList();
   })
   .catch(err => {
-    console.warn('自动加载失败:', err);
+    console.warn('自动读取 hanzilist.csv 失败（常见于直接双击 HTML 受本地安全跨域限制）:', err);
     noticeBar.classList.add('active');
   });
 </script>
