@@ -94,7 +94,6 @@ function renderList() {
   charGrid.innerHTML = filtered.map(item => `
     <div class="char-card" onclick="openModal(${item.id})">
       <div class="card-top">
-        <span class="char-id">#${item.id}</span>
         <span class="char-grade-badge">${item.grade}</span>
       </div>
       <div class="char-py">${item.pinyin_display}</div>
