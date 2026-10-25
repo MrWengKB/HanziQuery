@@ -402,7 +402,7 @@ header p {
   font-display: swap;
 }
 
-/* 长按时切换为甲骨文，字体里没有的字自动回退到楷体 */
+/* 点击按钮切换为甲骨文 */
 .char-main.oracle-mode,
 .modal-char-big.oracle-mode {
   font-family: "FZOracle", "LocalKaiti", "Kaiti SC", "STKaiti", "KaiTi", "SimKai", serif;
@@ -440,4 +440,8 @@ header p {
   font-size: 13px;
   padding: 3px 12px;
   margin: 4px 0 0;
+}
+
+.oracle-toggle.is-hidden {
+  display: none;
 }
