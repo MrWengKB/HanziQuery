@@ -412,10 +412,26 @@ header p {
   font-family: "FZOracle", "LocalKaiti", "Kaiti SC", "STKaiti", "KaiTi", "SimKai", serif;
 }
 
-/* 防止长按时选中文字或弹出系统菜单 */
-.char-main,
-.modal-char-big {
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
+.oracle-toggle {
+  display: inline-block;
+  margin: -2px 0 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.oracle-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.oracle-toggle.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
