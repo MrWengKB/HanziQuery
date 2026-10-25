@@ -16,7 +16,8 @@ function openModal(id) {
   document.getElementById('modalRadical').textContent = item.radical + ' 部';
   document.getElementById('modalStrokes').textContent = item.strokes + ' 画';
   document.getElementById('modalInitial').textContent = item.initial_display;
-  
+  document.getElementById('modalChar').classList.remove('oracle-mode');
+  setOracleToggle(false);
   modal.classList.add('active');
 }
 
@@ -34,3 +35,22 @@ if (modal) {
     if (e.target === modal) closeModal();
   });
 }
+
+// 甲骨文切换
+const oracleToggle = document.getElementById('oracleToggle');
+
+function setOracleToggle(on) {
+  if (!oracleToggle) return;
+  oracleToggle.classList.toggle('active', on);
+  oracleToggle.setAttribute('aria-pressed', on);
+}
+
+if (oracleToggle) {
+  oracleToggle.addEventListener('click', () => {
+    const on = document.getElementById('modalChar').classList.toggle('oracle-mode');
+    setOracleToggle(on);
+  });
+}
+
+// 预加载甲骨文字体，避免第一次切换时闪烁
+document.fonts?.load('1em FZOracle');
