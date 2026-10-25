@@ -23,11 +23,13 @@ function parseCSV(text) {
   const colIndex = {
     id: headers.findIndex(h => h.includes('序号')),
     grade: headers.findIndex(h => h.includes('年级')),
-    char: headers.findIndex(h => h.includes('生字') || h.includes('字')),
+    char: headers.findIndex(h => h.includes('生字') || (h.includes('字') && !h.includes('甲骨文'))),
     radical: headers.findIndex(h => h.includes('部首')),
     strokes: headers.findIndex(h => h.includes('笔画')),
     structure: headers.findIndex(h => h.includes('结构')),
-    lesson: headers.findIndex(h => h.includes('课次') || h.includes('课'))
+    lesson: headers.findIndex(h => h.includes('课次') || h.includes('课')),
+    oracle: headers.findIndex(h => h === '甲骨文'),
+    oracleChar: headers.findIndex(h => h === '甲骨文字')
   };
 
   const pinyinColIndices = [];
@@ -91,7 +93,10 @@ function parseCSV(text) {
       radical: colIndex.radical !== -1 ? (row[colIndex.radical] || '') : '',
       strokes: isNaN(strokesVal) ? 0 : strokesVal,
       structure: colIndex.structure !== -1 ? (row[colIndex.structure] || '') : '',
-      lesson: colIndex.lesson !== -1 ? (row[colIndex.lesson] || '') : ''
+      lesson: colIndex.lesson !== -1 ? (row[colIndex.lesson] || '') : '',
+      // 甲骨文：是否收录，以及切换时实际显示的字（字体多用繁体编码，如「马」显示为「馬」）
+      oracle: colIndex.oracle !== -1 && row[colIndex.oracle] === '有',
+      oracle_char: (colIndex.oracleChar !== -1 && row[colIndex.oracleChar]) || char
     });
   }
   return list;

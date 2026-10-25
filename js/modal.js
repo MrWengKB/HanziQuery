@@ -1,13 +1,18 @@
 const modal = document.getElementById('charModal');
 const modalClose = document.getElementById('modalClose');
+const modalCharEl = document.getElementById('modalChar');
+const oracleToggle = document.getElementById('oracleToggle');
+
+// 当前弹窗里的字（切换甲骨文时要用）
+let currentItem = null;
 
 // 打开指定 ID 汉字的详情弹窗
 function openModal(id) {
   if (!window.DATA) return;
   const item = window.DATA.find(d => d.id === id);
   if (!item) return;
+  currentItem = item;
 
-  document.getElementById('modalChar').textContent = item.char;
   document.getElementById('modalPinyin').textContent = item.pinyin_display;
   document.getElementById('modalGrade').textContent = item.grade;
   document.getElementById('modalLesson').textContent = item.lesson;
@@ -15,9 +20,29 @@ function openModal(id) {
   document.getElementById('modalRadical').textContent = item.radical + ' 部';
   document.getElementById('modalStrokes').textContent = item.strokes + ' 画';
   document.getElementById('modalInitial').textContent = item.initial_display;
-  document.getElementById('modalChar').classList.remove('oracle-mode');
-  setOracleToggle(false);
+
+  // 每次打开都先显示楷体；有甲骨文的字才显示切换按钮
+  setOracle(false);
+  if (oracleToggle) oracleToggle.classList.toggle('is-hidden', !item.oracle);
+
   modal.classList.add('active');
+}
+
+// 切换甲骨文 / 楷体
+function setOracle(on) {
+  if (!currentItem || !modalCharEl) return;
+  modalCharEl.textContent = on ? currentItem.oracle_char : currentItem.char;
+  modalCharEl.classList.toggle('oracle-mode', on);
+  if (oracleToggle) {
+    oracleToggle.classList.toggle('active', on);
+    oracleToggle.setAttribute('aria-pressed', on);
+  }
+}
+
+if (oracleToggle) {
+  oracleToggle.addEventListener('click', () => {
+    setOracle(!oracleToggle.classList.contains('active'));
+  });
 }
 
 // 关闭弹窗
@@ -35,21 +60,5 @@ if (modal) {
   });
 }
 
-// 甲骨文切换
-const oracleToggle = document.getElementById('oracleToggle');
-
-function setOracleToggle(on) {
-  if (!oracleToggle) return;
-  oracleToggle.classList.toggle('active', on);
-  oracleToggle.setAttribute('aria-pressed', on);
-}
-
-if (oracleToggle) {
-  oracleToggle.addEventListener('click', () => {
-    const on = document.getElementById('modalChar').classList.toggle('oracle-mode');
-    setOracleToggle(on);
-  });
-}
-
-// 预加载甲骨文字体，避免第一次切换时闪烁
+// 预加载甲骨文字体，避免第一次切换时闪一下
 document.fonts?.load('1em FZOracle');
