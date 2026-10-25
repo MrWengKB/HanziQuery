@@ -70,11 +70,11 @@ function renderList() {
 
   const filtered = window.DATA.filter(item => {
     if (query) {
-      const matchChar = item.char.includes(query);
-      const matchPy = item.pinyins.some(p => p.toLowerCase().includes(query));
-      const matchPlain = item.pinyin_plains.some(p => p.includes(query));
-      if (!matchChar && !matchPy && !matchPlain) return false;
-    }
+  const matchChar = item.char.includes(query);
+  const matchPy = item.pinyins.some(p => p.toLowerCase().startsWith(query));
+  const matchPlain = item.pinyin_plains.some(p => p.startsWith(query));
+  if (!matchChar && !matchPy && !matchPlain) return false;
+}
     if (grade && item.grade !== grade) return false;
     if (lesson && item.lesson !== lesson) return false;
     if (struct && item.structure !== struct) return false;
