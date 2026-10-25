@@ -396,3 +396,26 @@ header p {
   font-weight: 600;
   color: var(--text);
 }
+
+/* 甲骨文字体声明（路径相对于 style.css；若 css 不在根目录，改为 '/FZ-oracle.ttf'） */
+@font-face {
+  font-family: 'FZOracle';
+  src: url('FZ-oracle.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 长按时切换为甲骨文，字体里没有的字自动回退到楷体 */
+.char-main.oracle-mode,
+.modal-char-big.oracle-mode {
+  font-family: "FZOracle", "LocalKaiti", "Kaiti SC", "STKaiti", "KaiTi", "SimKai", serif;
+}
+
+/* 防止长按时选中文字或弹出系统菜单 */
+.char-main,
+.modal-char-big {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
