@@ -425,12 +425,16 @@ header p {
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.oracle-toggle:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+/* 只在有鼠标的设备上、且未激活时才有悬停效果，避免触屏"粘住" */
+@media (hover: hover) {
+  .oracle-toggle:not(.active):hover {
+    border-color: #c8743d;
+    color: #c8743d;
+  }
 }
 
-.oracle-toggle.active {
+.oracle-toggle.active,
+.oracle-toggle.active:hover {
   background: #c8743d;
   border-color: #c8743d;
   color: #fff;
