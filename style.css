@@ -431,9 +431,9 @@ header p {
 }
 
 .oracle-toggle.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #666;
+  background: #c8743d;
+  border-color: #c8743d;
+  color: #fff;
 }
 
 .modal-char-view .oracle-toggle {
