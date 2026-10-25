@@ -9,7 +9,6 @@ function openModal(id) {
 
   document.getElementById('modalChar').textContent = item.char;
   document.getElementById('modalPinyin').textContent = item.pinyin_display;
-  document.getElementById('modalId').textContent = '#' + item.id;
   document.getElementById('modalGrade').textContent = item.grade;
   document.getElementById('modalLesson').textContent = item.lesson;
   document.getElementById('modalStruct').textContent = item.structure;
