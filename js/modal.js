@@ -1,6 +1,7 @@
 const modal = document.getElementById('charModal');
 const modalClose = document.getElementById('modalClose');
 const modalCharEl = document.getElementById('modalChar');
+const modalPinyinEl = document.getElementById('modalPinyin');
 const oracleToggle = document.getElementById('oracleToggle');
 const modalContent = modal ? modal.querySelector('.modal-content') : null;
 const modalCharView = modal ? modal.querySelector('.modal-char-view') : null;
@@ -9,6 +10,78 @@ const modalCharView = modal ? modal.querySelector('.modal-char-view') : null;
 let currentItem = null;
 // 当前字在查询结果 window.CURRENT_LIST 中的位置（-1 表示不在列表里）
 let currentIndex = -1;
+
+// ---------- 点拼音发音 ----------
+// 音频文件放在 audio/ 目录，按「无调拼音 + 声调数字」命名，如 audio/chang2.mp3、audio/lv4.mp3
+const AUDIO_DIR = 'audio/';
+const AUDIO_PREFIX = '';   // 音频包文件名若有前缀（如 'cmn-'）就填在这里
+const AUDIO_EXT = '.mp3';
+const NEUTRAL_TONE = 5;    // 轻声的编号：按音频包改成 5 或 0
+const TONE_MARKS = 'āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ';
+const TONE_BASE  = 'aaaaeeeeiiiioooouuuuvvvv';
+// 匹配一个拼音音节（带调号，或末尾带数字声调）
+const PINYIN_RE = /[a-zA-ZüÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙ]+[0-5]?/g;
+
+let currentAudio = null;
+
+// cháng → chang2，lǜ → lv4，chang2 → chang2
+function pinyinToFile(py) {
+  let tone = NEUTRAL_TONE;
+  let base = '';
+  for (const c of py.normalize('NFC').toLowerCase()) {
+    const i = TONE_MARKS.indexOf(c);
+    if (i !== -1) { tone = (i % 4) + 1; base += TONE_BASE[i]; }
+    else if (/[0-5]/.test(c)) { tone = Number(c); }
+    else base += (c === 'ü' ? 'v' : c);
+  }
+  return AUDIO_PREFIX + base + tone;
+}
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  if (modalPinyinEl) {
+    modalPinyinEl.querySelectorAll('.py-play.playing')
+      .forEach(el => el.classList.remove('playing'));
+  }
+}
+
+function playPinyin(py, el) {
+  stopAudio();
+  const audio = new Audio(AUDIO_DIR + pinyinToFile(py) + AUDIO_EXT);
+  currentAudio = audio;
+  el.classList.add('playing');
+  const done = () => el.classList.remove('playing');
+  audio.addEventListener('ended', done);
+  audio.addEventListener('error', () => {
+    done();
+    el.classList.add('no-audio'); // 找不到音频时变淡，方便排查文件名
+  });
+  audio.play().catch(done);
+}
+
+// 把拼音文字拆成可点击的按钮，分隔符（、/ 空格等）原样保留
+function renderPinyin(container, text) {
+  container.textContent = '';
+  let last = 0;
+  for (const m of text.matchAll(PINYIN_RE)) {
+    if (m.index > last) container.append(text.slice(last, m.index));
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'py-play';
+    btn.textContent = m[0];
+    btn.setAttribute('aria-label', `朗读 ${m[0]}`);
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      playPinyin(m[0], btn);
+    });
+    container.append(btn);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) container.append(text.slice(last));
+}
 
 // ---------- 上一个 / 下一个：按钮和计数（由脚本生成，不用改 index.html） ----------
 const modalCounter = document.createElement('div');
@@ -62,8 +135,9 @@ function showAt(idx) {
 // 把字的资料填进弹窗
 function fillModal(item) {
   currentItem = item;
+  stopAudio(); // 换字时停掉上一个字的读音
 
-  document.getElementById('modalPinyin').textContent = item.pinyin_display;
+  renderPinyin(modalPinyinEl, String(item.pinyin_display || ''));
   document.getElementById('modalGrade').textContent = item.grade;
   document.getElementById('modalLesson').textContent = item.lesson;
   document.getElementById('modalStruct').textContent = item.structure;
@@ -127,6 +201,7 @@ if (oracleToggle) {
 
 // 关闭弹窗
 function closeModal() {
+  stopAudio();
   modal.classList.remove('active');
 }
 
