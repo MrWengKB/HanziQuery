@@ -141,8 +141,8 @@ function fillModal(item) {
   document.getElementById('modalGrade').textContent = item.grade;
   document.getElementById('modalLesson').textContent = item.lesson;
   document.getElementById('modalStruct').textContent = item.structure;
-  document.getElementById('modalRadical').textContent = item.radical + ' 部';
-  document.getElementById('modalStrokes').textContent = item.strokes + ' 画';
+  document.getElementById('modalRadical').textContent = item.radical;
+  document.getElementById('modalStrokes').textContent = item.strokes;
   document.getElementById('modalInitial').textContent = item.initial_display;
 
   // 每次打开都先显示楷体；有甲骨文的字才显示切换按钮
