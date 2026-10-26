@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 田字格中线 -->
+    <path
+        android:pathData="M54,33 V75 M33,54 H75"
+        android:strokeColor="#B3FFFFFF"
+        android:strokeWidth="1.6" />
+    <!-- 田字格外框 -->
+    <path
+        android:pathData="M33,33 H75 V75 H33 Z"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:strokeLineJoin="round" />
+    <!-- 放大镜镜片 -->
+    <path
+        android:pathData="M54,63 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0"
+        android:fillColor="#2563EB"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4" />
+    <!-- 放大镜手柄 -->
+    <path
+        android:pathData="M71.5,70.5 L80,79"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+</vector>
