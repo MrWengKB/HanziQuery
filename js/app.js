@@ -105,6 +105,7 @@ function renderList() {
     <div class="char-card" onclick="openModal(${item.id})">
       <div class="card-top">
         <span class="char-grade-badge">${item.grade}</span>
+        <span class="badge">${item.lesson}</span>
       </div>
       <div class="char-py">${item.pinyin_display}</div>
       <div class="char-main">${item.char}</div>
