@@ -6,6 +6,15 @@
   <title>小学华文识读字查询系统</title>
   <!-- 引入样式文件 -->
   <link rel="stylesheet" href="style.css?v=2">
+  <!-- PWA：可添加到主屏幕、离线使用 -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="识读字查询">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
 <body>
 
@@ -128,5 +137,11 @@
 <script src="js/parser.js?v=2"></script>
 <script src="js/modal.js?v=2"></script>
 <script src="js/app.js?v=2"></script>
+<!-- 注册离线缓存（安卓 App 里已自带离线文件，不需要注册） -->
+<script>
+  if ('serviceWorker' in navigator && location.hostname !== 'appassets.androidplatform.net') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
 </body>
 </html>
