@@ -459,3 +459,85 @@ header p {
   font-size: 13px;
   color: var(--text-muted);
 }
+
+/* ---------- 详情弹窗：上一个 / 下一个 ---------- */
+.modal-counter {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.modal-char-view {
+  position: relative;
+}
+
+.modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 28px;
+  line-height: 1;
+  padding-bottom: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.modal-nav-prev { left: 0; }
+.modal-nav-next { right: 0; }
+
+@media (hover: hover) {
+  .modal-nav:not(:disabled):hover {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+}
+
+.modal-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.modal-nav.is-hidden {
+  display: none;
+}
+
+/* 切换时的滑入动画 */
+.modal-content.swap-next .modal-char-big,
+.modal-content.swap-next .modal-pinyin,
+.modal-content.swap-next .modal-details {
+  animation: swapFromRight 0.18s ease-out;
+}
+.modal-content.swap-prev .modal-char-big,
+.modal-content.swap-prev .modal-pinyin,
+.modal-content.swap-prev .modal-details {
+  animation: swapFromLeft 0.18s ease-out;
+}
+
+@keyframes swapFromRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes swapFromLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-content.swap-next *,
+  .modal-content.swap-prev * {
+    animation: none !important;
+  }
+}
