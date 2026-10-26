@@ -1,5 +1,7 @@
 // 全局数据源
 window.DATA = [];
+// 当前查询结果（renderList 每次更新）
+window.CURRENT_LIST = [];
 
 // DOM 元素引用
 const searchInput = document.getElementById('searchInput');
@@ -85,6 +87,9 @@ function renderList() {
   });
 
   
+  // 保存当前查询结果，详情弹窗左右切换时按这个顺序走
+  window.CURRENT_LIST = filtered;
+
   matchCount.textContent = filtered.length;
   // 没有任何查询或筛选时，只显示前 30 个字
   const INITIAL_LIMIT = 30;
