@@ -14,7 +14,7 @@ let currentIndex = -1;
 // ---------- 点拼音发音 ----------
 // 音频文件放在 audio/ 目录，按「无调拼音 + 声调数字」命名，如 audio/chang2.mp3、audio/lv4.mp3
 const AUDIO_DIR = 'audio/';
-const AUDIO_PREFIX = '';   // 音频包文件名若有前缀（如 'cmn-'）就填在这里
+const AUDIO_PREFIX = 'cmn-';   // 音频包文件名若有前缀（如 'cmn-'）就填在这里
 const AUDIO_EXT = '.mp3';
 const NEUTRAL_TONE = 1;    // 轻声的编号：按音频包改成 5 或 0
 const TONE_MARKS = 'āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ';
