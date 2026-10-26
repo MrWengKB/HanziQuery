@@ -16,7 +16,7 @@ let currentIndex = -1;
 const AUDIO_DIR = 'audio/';
 const AUDIO_PREFIX = '';   // 音频包文件名若有前缀（如 'cmn-'）就填在这里
 const AUDIO_EXT = '.mp3';
-const NEUTRAL_TONE = 5;    // 轻声的编号：按音频包改成 5 或 0
+const NEUTRAL_TONE = 1;    // 轻声的编号：按音频包改成 5 或 0
 const TONE_MARKS = 'āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ';
 const TONE_BASE  = 'aaaaeeeeiiiioooouuuuvvvv';
 // 匹配一个拼音音节（带调号，或末尾带数字声调）
