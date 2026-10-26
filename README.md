@@ -15,4 +15,4 @@
 hanzilist是一个包含汉字详情的CSV。网页使用JS读取这个CSV，并渲染每张字卡。<br>
 汉字详情是使用Claude交叉比对权威字典网站生成，并经人工检查。因为最后是人工检查，所以可能会有错误。<br>
 甲骨文使用免费的方正甲骨文字体。每次加入新字，会使用PY检测某字是否存在于这个字体里，并在上述CSV里标记。
-发音音频来自 https://github.com/hugolpz/audio-cmn/tree/master (CC-by-sa)
+发音音频来自 https://github.com/hugolpz/audio-cmn/ (CC-by-sa) 但删除了标准汉语不存在的音节。轻声作第一声处理。
