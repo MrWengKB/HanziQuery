@@ -84,14 +84,19 @@ function renderList() {
     return true;
   });
 
+  
   matchCount.textContent = filtered.length;
+  // 没有任何查询或筛选时，只显示前 30 个字
+  const INITIAL_LIMIT = 30;
+  const hasFilter = query || grade || lesson || struct || initial || radical || stroke;
+  const shown = hasFilter ? filtered : filtered.slice(0, INITIAL_LIMIT);
 
   if (filtered.length === 0) {
     charGrid.innerHTML = '<div class="empty-state">没有找到符合条件的汉字，请尝试更换或清空筛选条件。</div>';
     return;
   }
 
-  charGrid.innerHTML = filtered.map(item => `
+  charGrid.innerHTML = shown.map(item => `
     <div class="char-card" onclick="openModal(${item.id})">
       <div class="card-top">
         <span class="char-grade-badge">${item.grade}</span>
@@ -105,6 +110,10 @@ function renderList() {
       </div>
     </div>
   `).join('');
+
+  if (!hasFilter && filtered.length > INITIAL_LIMIT) {
+    charGrid.innerHTML += `<div class="more-hint">仅显示前 ${INITIAL_LIMIT} 个字，输入拼音或选择筛选条件可查看更多。</div>`;
+  }
 }
 
 // 监听各输入项变更
