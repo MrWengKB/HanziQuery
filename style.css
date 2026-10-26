@@ -541,3 +541,8 @@ header p {
     animation: none !important;
   }
 }
+
+.py-play { all: unset; cursor: pointer; border-radius: 6px; padding: 0 .15em; }
+.py-play:hover, .py-play:focus-visible { background: rgba(59,130,246,.12); }
+.py-play.playing { color: #2563eb; }
+.py-play.no-audio { opacity: .5; }
