@@ -260,7 +260,7 @@ header p {
 }
 
 .char-main {
-  font-size: 38px;
+  font-size: 48px;
   font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: 600;
   color: #0f172a;
@@ -358,7 +358,7 @@ header p {
 }
 
 .modal-char-big {
-  font-size: 72px;
+  font-size: 84px;
   font-family: "LocalKaiti", "Kaiti SC", "STKaiti", "华文楷体", "KaiTi", "楷体", "SimKai", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
   line-height: 1;
   margin: 8px 0;
@@ -366,7 +366,7 @@ header p {
 }
 
 .modal-pinyin {
-  font-size: 22px;
+  font-size: 24px;
   color: var(--primary);
   font-weight: 600;
   letter-spacing: 0.5px;
