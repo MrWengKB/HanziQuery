@@ -1,7 +1,12 @@
 // 去除拼音声调（用于不带声调的检索匹配）
 function getPinyinPlain(py) {
   if (!py) return '';
-  return py.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  return py
+    .normalize('NFD')
+    .replace(/[\u0300\u0301\u0304\u030c]/g, '') // 只去掉声调符号（阴阳上去四声），保留 ü 的分音符
+    .normalize('NFC') // 重新组合成 ü，而不是分解形式
+    .toLowerCase()
+    .trim();
 }
 
 // 提取声母/首字母
