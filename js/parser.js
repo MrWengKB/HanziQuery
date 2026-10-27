@@ -44,6 +44,13 @@ function parseCSV(text) {
     }
   });
 
+  const yunmuColIndices = [];
+  headers.forEach((h, idx) => {
+    if (h.includes('韵母')) {
+      yunmuColIndices.push(idx);
+    }
+  });
+
   const list = [];
   for (let i = 1; i < lines.length; i++) {
     const row = [];
@@ -86,6 +93,15 @@ function parseCSV(text) {
     const pinyinPlains = pinyins.map(p => getPinyinPlain(p));
     const strokesVal = parseInt(row[colIndex.strokes], 10);
 
+    // 提取并聚合韵母（韵母1 对应拼音1，韵母2 对应拼音2，多音字去重）
+    const finals = [];
+    yunmuColIndices.forEach(idx => {
+      const val = row[idx];
+      if (val && !finals.includes(val)) {
+        finals.push(val);
+      }
+    });
+
     list.push({
       id: colIndex.id !== -1 ? (parseInt(row[colIndex.id], 10) || i) : i,
       grade: colIndex.grade !== -1 ? (row[colIndex.grade] || 'P1') : 'P1',
@@ -95,6 +111,8 @@ function parseCSV(text) {
       pinyin_plains: pinyinPlains,
       initials: initials,
       initial_display: initials.join(' / '),
+      finals: finals,
+      final_display: finals.join(' / '),
       radical: colIndex.radical !== -1 ? (row[colIndex.radical] || '') : '',
       strokes: isNaN(strokesVal) ? 0 : strokesVal,
       structure: colIndex.structure !== -1 ? (row[colIndex.structure] || '') : '',
