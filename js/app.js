@@ -72,9 +72,11 @@ function renderList() {
 
   const filtered = window.DATA.filter(item => {
     if (query) {
+      const altQuery = query.replace(/v/g, 'ü'); // v 是 ü 的替代输入，只对无调拼音生效
       const matchChar = item.char === query;
-      const matchPy = item.pinyins.some(p => p.toLowerCase() === query);
-      const matchPlain = item.pinyin_plains.some(p => p === query);
+      const matchPy = item.pinyins.some(p => p.toLowerCase() === query); // 带调号，无需处理 v
+      const matchPlain = item.pinyin_plains.some(p => p === query || p === altQuery);
+
       if (!matchChar && !matchPy && !matchPlain) return false;
     }
     if (grade && item.grade !== grade) return false;
