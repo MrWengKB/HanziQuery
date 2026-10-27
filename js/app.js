@@ -9,6 +9,7 @@ const gradeFilter = document.getElementById('gradeFilter');
 const lessonFilter = document.getElementById('lessonFilter');
 const structFilter = document.getElementById('structFilter');
 const initialFilter = document.getElementById('initialFilter');
+const finalFilter = document.getElementById('finalFilter');
 const radicalFilter = document.getElementById('radicalFilter');
 const strokeFilter = document.getElementById('strokeFilter');
 const resetBtn = document.getElementById('resetBtn');
@@ -53,6 +54,13 @@ function initFilters() {
   const initials = [...allInitials].sort();
   populateSelect(initialFilter, initials, '全部首字母 (A-Z)');
 
+  const allFinals = new Set();
+  window.DATA.forEach(d => {
+    d.finals.forEach(f => allFinals.add(f));
+  });
+  const finals = [...allFinals].sort();
+  populateSelect(finalFilter, finals, '全部韵母');
+
   const radicals = [...new Set(window.DATA.map(d => d.radical).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh'));
   populateSelect(radicalFilter, radicals, '全部部首');
 
@@ -67,6 +75,7 @@ function renderList() {
   const lesson = lessonFilter.value;
   const struct = structFilter.value;
   const initial = initialFilter.value;
+  const final = finalFilter.value;
   const radical = radicalFilter.value;
   const stroke = strokeFilter.value;
 
@@ -83,6 +92,7 @@ function renderList() {
     if (lesson && item.lesson !== lesson) return false;
     if (struct && item.structure !== struct) return false;
     if (initial && !item.initials.includes(initial)) return false;
+    if (final && !item.finals.includes(final)) return false;
     if (radical && item.radical !== radical) return false;
     if (stroke && item.strokes !== parseInt(stroke, 10)) return false;
     return true;
@@ -95,7 +105,7 @@ function renderList() {
   matchCount.textContent = filtered.length;
   // 没有任何查询或筛选时，只显示前 30 个字
   const INITIAL_LIMIT = 30;
-  const hasFilter = query || grade || lesson || struct || initial || radical || stroke;
+  const hasFilter = query || grade || lesson || struct || initial || final || radical || stroke;
   const shown = hasFilter ? filtered : filtered.slice(0, INITIAL_LIMIT);
 
   if (filtered.length === 0) {
@@ -125,7 +135,7 @@ function renderList() {
 }
 
 // 监听各输入项变更
-[searchInput, gradeFilter, lessonFilter, structFilter, initialFilter, radicalFilter, strokeFilter].forEach(el => {
+[searchInput, gradeFilter, lessonFilter, structFilter, initialFilter, finalFilter, radicalFilter, strokeFilter].forEach(el => {
   if (el) {
     el.addEventListener('input', renderList);
     el.addEventListener('change', renderList);
@@ -140,6 +150,7 @@ if (resetBtn) {
     lessonFilter.value = '';
     structFilter.value = '';
     initialFilter.value = '';
+    finalFilter.value = '';
     radicalFilter.value = '';
     strokeFilter.value = '';
     renderList();
