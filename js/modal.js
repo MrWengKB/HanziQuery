@@ -1,5 +1,5 @@
 const modal = document.getElementById('charModal');
-const modalClose = document.getElementById('modalClose');
+// const modalClose = document.getElementById('modalClose');
 const modalCharEl = document.getElementById('modalChar');
 const modalPinyinEl = document.getElementById('modalPinyin');
 const oracleToggle = document.getElementById('oracleToggle');
@@ -206,9 +206,9 @@ function closeModal() {
 }
 
 // 绑定弹窗事件
-if (modalClose) {
+/* if (modalClose) {
   modalClose.addEventListener('click', closeModal);
-}
+} */
 if (modal) {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
