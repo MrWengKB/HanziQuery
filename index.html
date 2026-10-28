@@ -37,7 +37,7 @@
   <!-- 筛选控件区域 -->
   <div class="filter-card">
     <div class="search-row">
-      <input type="text" id="searchInput" class="search-input" placeholder="输入汉字（如“长”）或任一拼音，无需调号 (如chang、zhang)；v = ü " autocomplete="off">
+      <input type="text" id="searchInput" class="search-input" placeholder="输入汉字（如“长”）、任一拼音（无需调号，如chang、zhang；v = ü）或课文词语（如“西瓜”）" autocomplete="off">
     </div>
 
     <div class="filters-grid">
@@ -106,7 +106,7 @@
 <!-- 汉字详情弹窗 -->
 <div class="modal-overlay" id="charModal">
   <div class="modal-content">
-    
+    <button class="modal-close" id="modalClose">&times;</button>
     <div class="modal-char-view">
       <div class="modal-pinyin" id="modalPinyin"></div>
       <div class="modal-char-big" id="modalChar"></div>
@@ -142,9 +142,9 @@
 </div>
 
 <!-- 模块化引入 JS 脚本（注意引入顺序：工具/弹窗优先，入口 app 随后） -->
-<script src="js/parser.js?v=6"></script>
+<script src="js/parser.js?v=7"></script>
 <script src="js/modal.js?v=5"></script>
-<script src="js/app.js?v=6"></script>
+<script src="js/app.js?v=7"></script>
 <!-- 注册离线缓存（安卓 App 里已自带离线文件，不需要注册） -->
 <script>
   if ('serviceWorker' in navigator && location.hostname !== 'appassets.androidplatform.net') {
