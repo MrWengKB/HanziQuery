@@ -51,6 +51,9 @@ function parseCSV(text) {
     }
   });
 
+  // 课文词语列（不参与筛选下拉框，只用于搜索）
+  const wordsColIndex = headers.findIndex(h => h.includes('词语'));
+
   const list = [];
   for (let i = 1; i < lines.length; i++) {
     const row = [];
@@ -102,6 +105,19 @@ function parseCSV(text) {
       }
     });
 
+    // 课文词语（一格可存多个，用同样的分隔符拆开；只用于搜索，不建筛选下拉框）
+    const words = [];
+    if (wordsColIndex !== -1) {
+      const val = row[wordsColIndex];
+      if (val) {
+        val.split(/[/、,，;；\s]+/).map(s => s.trim()).filter(Boolean).forEach(w => {
+          if (!words.includes(w)) {
+            words.push(w);
+          }
+        });
+      }
+    }
+
     list.push({
       id: colIndex.id !== -1 ? (parseInt(row[colIndex.id], 10) || i) : i,
       grade: colIndex.grade !== -1 ? (row[colIndex.grade] || 'P1') : 'P1',
@@ -113,6 +129,8 @@ function parseCSV(text) {
       initial_display: initials.join(' / '),
       finals: finals,
       final_display: finals.join(' / '),
+      words: words,
+      words_display: words.join(' / '),
       radical: colIndex.radical !== -1 ? (row[colIndex.radical] || '') : '',
       strokes: isNaN(strokesVal) ? 0 : strokesVal,
       structure: colIndex.structure !== -1 ? (row[colIndex.structure] || '') : '',
