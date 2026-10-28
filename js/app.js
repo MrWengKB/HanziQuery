@@ -85,8 +85,9 @@ function renderList() {
       const matchChar = item.char === query;
       const matchPy = item.pinyins.some(p => p.toLowerCase() === query); // 带调号，无需处理 v
       const matchPlain = item.pinyin_plains.some(p => p === query || p === altQuery);
+      const matchWord = item.words.some(w => w === query); // 课文词语，精确匹配整个词
 
-      if (!matchChar && !matchPy && !matchPlain) return false;
+      if (!matchChar && !matchPy && !matchPlain && !matchWord) return false;
     }
     if (grade && item.grade !== grade) return false;
     if (lesson && item.lesson !== lesson) return false;
