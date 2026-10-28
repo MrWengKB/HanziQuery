@@ -142,7 +142,7 @@ function fillModal(item) {
   document.getElementById('modalStruct').textContent = item.structure;
   document.getElementById('modalRadical').textContent = item.radical;
   document.getElementById('modalStrokes').textContent = item.strokes;
-  document.getElementById('modalInitial').textContent = item.initial_display;
+  document.getElementById('modalWords').textContent = item.words_display;
 
   // 每次打开都先显示楷体；有甲骨文的字才显示切换按钮
   setOracle(false);
