@@ -279,6 +279,8 @@
       s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+)__/g, '<strong>$1</strong>');
       s = s.replace(/\*([^*\s][^*]*)\*/g, '<em>$1</em>');
       s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+      // 允许 Markdown 里直接写的 <br>、<br/>、<br /> 换行（代码里的不受影响）
+      s = s.replace(/&lt;br\s*\/?&gt;/gi, '<br>');
       s = s.replace(/\u0000(\d+)\u0000/g, function (m, i) { return '<code>' + codes[i] + '</code>'; });
       return s;
     }
