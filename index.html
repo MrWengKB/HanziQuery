@@ -269,6 +269,13 @@
       var codes = [];
       s = esc(s);
       s = s.replace(/`([^`]+)`/g, function (m, c) { codes.push(c); return '\u0000' + (codes.length - 1) + '\u0000'; });
+      // 允许 Markdown 里直接写的 <a href="...">文字</a>，先存起来，避免网址里的 _ * 被当成粗体斜体
+      var anchors = [];
+      s = s.replace(/&lt;a\s[\s\S]*?href=(?:&quot;(.*?)&quot;|'(.*?)')[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, function (m, h1, h2, text) {
+        var href = (h1 || h2 || '').replace(/&amp;/g, '&');
+        anchors.push('<a href="' + esc(safeUrl(href)) + '" target="_blank" rel="noopener">');
+        return '\u0001' + (anchors.length - 1) + '\u0001' + text + '\u0002';
+      });
       s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g, function (m, alt, src) {
         return '<img alt="' + alt + '" src="' + safeUrl(src) + '">';
       });
@@ -281,6 +288,7 @@
       s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
       // 允许 Markdown 里直接写的 <br>、<br/>、<br /> 换行（代码里的不受影响）
       s = s.replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+      s = s.replace(/\u0001(\d+)\u0001/g, function (m, i) { return anchors[i]; }).replace(/\u0002/g, '</a>');
       s = s.replace(/\u0000(\d+)\u0000/g, function (m, i) { return '<code>' + codes[i] + '</code>'; });
       return s;
     }
