@@ -23,7 +23,7 @@ const CORE_FILES = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png'
-  'readme.md'
+  'README.md'
 ];
 const FONT_FILES = ['kaiti.ttf', 'FZ-oracle.ttf'];
 
