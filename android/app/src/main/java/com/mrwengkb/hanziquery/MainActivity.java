@@ -48,6 +48,8 @@ public class MainActivity extends Activity {
             "https://api.github.com/repos/MrWengKB/HanziQuery/releases/tags/apk-latest";
     private static final String RELEASE_PAGE =
             "https://github.com/MrWengKB/HanziQuery/releases/tag/apk-latest";
+    // 版本号，例如 v2.56 → 2.56
+    private static final Pattern VERSION_NO = Pattern.compile("[vV]\\s*(\\d+(?:\\.\\d+)*)");
     // 发布说明里的「第 N 次构建」，N 与 App 的 versionCode 相同
     private static final Pattern BUILD_NO = Pattern.compile("第\\s*(\\d+)\\s*次构建");
     // Markdown：# 标题、- 列表
@@ -140,19 +142,32 @@ public class MainActivity extends Activity {
                     notes = markdownToStyled(firstSection(body));
                 }
 
+                // 最新版本号：取自发布标题，例如「安卓离线版 v2.56」
+                Matcher vm = VERSION_NO.matcher(release.optString("name", ""));
+                final String latestVersion = vm.find() ? vm.group(1) : null;
+
                 final String downloadUrl = url;
                 final CharSequence updateNotes = notes;
-                runOnUiThread(() -> showUpdateDialog(downloadUrl, updateNotes));
+                runOnUiThread(() -> showUpdateDialog(downloadUrl, updateNotes, latestVersion));
             } catch (Exception ignored) {
                 // 没网、超时、GitHub 暂时不可用：都静默跳过
             }
         }).start();
     }
 
-    private void showUpdateDialog(String downloadUrl, CharSequence notes) {
+    private void showUpdateDialog(String downloadUrl, CharSequence notes, String latestVersion) {
         if (isFinishing() || isDestroyed()) return;
 
         SpannableStringBuilder msg = new SpannableStringBuilder("有新版本可以下载。");
+
+        // 当前版本 / 最新版本，方便用户比较
+        String current = currentVersionName();
+        if (current != null) {
+            msg.append("\n当前版本：v").append(current);
+        }
+        if (latestVersion != null) {
+            msg.append("\n最新版本：v").append(latestVersion);
+        }
         if (notes != null && notes.length() > 0) {
             msg.append("\n\n").append(notes);
         }
@@ -234,6 +249,17 @@ public class MainActivity extends Activity {
             return readAll(conn.getInputStream());
         } finally {
             conn.disconnect();
+        }
+    }
+
+    /** 当前安装的版本名称（取自 version-history.md，例如 2.55）；读不到时返回 null */
+    private String currentVersionName() {
+        try {
+            String name = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            if (name == null || name.isEmpty() || name.equals("0.0")) return null;
+            return name.replaceFirst("^[vV]", "");
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
         }
     }
 
