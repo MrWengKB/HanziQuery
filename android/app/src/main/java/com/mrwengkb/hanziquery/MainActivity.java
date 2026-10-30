@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * 这样网页里的 fetch('hanzilist.csv') 和字体文件都能正常读取，无需联网。
  *
  * 检查更新：启动时如果有网络，会查询 GitHub Releases 的 apk-latest，
- * 发现更新的构建编号就读取仓库根目录 version-history.md 的第一段，在弹窗里显示更新内容，再问是否下载；
+ * 发现更新的构建编号就显示发布说明里的更新内容（打包时从 version-history.md 第一段写入），再问是否下载；
  * 没网或出错时静默跳过，不影响使用。
  */
 public class MainActivity extends Activity {
@@ -48,9 +48,6 @@ public class MainActivity extends Activity {
             "https://api.github.com/repos/MrWengKB/HanziQuery/releases/tags/apk-latest";
     private static final String RELEASE_PAGE =
             "https://github.com/MrWengKB/HanziQuery/releases/tag/apk-latest";
-    // 更新内容：取仓库根目录 version-history.md 的第一段（最新版本）
-    private static final String UPDATES_URL =
-            "https://raw.githubusercontent.com/MrWengKB/HanziQuery/main/version-history.md";
     // 发布说明里的「第 N 次构建」，N 与 App 的 versionCode 相同
     private static final Pattern BUILD_NO = Pattern.compile("第\\s*(\\d+)\\s*次构建");
     // Markdown：# 标题、- 列表
@@ -135,12 +132,12 @@ public class MainActivity extends Activity {
                     }
                 }
 
-                // 读取更新内容；读不到也照样提示更新，只是不显示内容
+                // 更新内容就在发布说明里（打包时写入，和这个 APK 一定对得上）；
+                // 没有内容也照样提示更新，只是不显示内容
                 CharSequence notes = null;
-                try {
-                    String md = httpGet(UPDATES_URL, "text/plain");
-                    if (md != null) notes = markdownToStyled(firstSection(md));
-                } catch (Exception ignored) {
+                String body = release.optString("body", "");
+                if (hasHeading(body)) {
+                    notes = markdownToStyled(firstSection(body));
                 }
 
                 final String downloadUrl = url;
@@ -167,6 +164,14 @@ public class MainActivity extends Activity {
                 .setPositiveButton("下载安装", (dialog, which) -> openExternal(Uri.parse(downloadUrl)))
                 .setNegativeButton("以后再说", null)
                 .show();
+    }
+
+    /** 是否含有 # 标题 */
+    private static boolean hasHeading(String md) {
+        for (String line : md.split("\n")) {
+            if (line.trim().startsWith("#")) return true;
+        }
+        return false;
     }
 
     /** 取出第一个 # 标题及其下面的内容，到下一个 # 标题为止（即最新一个版本） */
