@@ -42,8 +42,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # 取 version-history.md 的第一段（最新版本）写进发布说明，App 的更新提醒就显示这一段
+          awk '/^[[:space:]]*#/{n++} n==1' version-history.md > latest-notes.md
+          VERSION=$(grep -oE '[vV][0-9]+(\.[0-9]+)*' latest-notes.md | head -1)
+          {
+            echo "第 ${{ github.run_number }} 次构建。下载 HanziQuery.apk 安装即可离线使用。"
+            echo
+            cat latest-notes.md
+          } > release-notes.md
+
           gh release delete apk-latest --cleanup-tag -y || true
           gh release create apk-latest HanziQuery.apk \
-            --title "安卓离线版（最新）" \
-            --notes "第 ${{ github.run_number }} 次构建。下载 HanziQuery.apk 安装即可离线使用。" \
+            --title "安卓离线版 ${VERSION:-（最新）}" \
+            --notes-file release-notes.md \
             --latest
