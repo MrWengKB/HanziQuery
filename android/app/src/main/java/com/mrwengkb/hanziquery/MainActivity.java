@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * 这样网页里的 fetch('hanzilist.csv') 和字体文件都能正常读取，无需联网。
  *
  * 检查更新：启动时如果有网络，会查询 GitHub Releases 的 apk-latest，
- * 发现更新的构建编号就读取仓库根目录的 updates.md，在弹窗里显示更新内容，再问是否下载；
+ * 发现更新的构建编号就读取仓库根目录 version-history.md 的第一段，在弹窗里显示更新内容，再问是否下载；
  * 没网或出错时静默跳过，不影响使用。
  */
 public class MainActivity extends Activity {
@@ -45,9 +45,9 @@ public class MainActivity extends Activity {
             "https://api.github.com/repos/MrWengKB/HanziQuery/releases/tags/apk-latest";
     private static final String RELEASE_PAGE =
             "https://github.com/MrWengKB/HanziQuery/releases/tag/apk-latest";
-    // 更新内容：仓库根目录的 updates.md
+    // 更新内容：取仓库根目录 version-history.md 的第一段（最新版本）
     private static final String UPDATES_URL =
-            "https://raw.githubusercontent.com/MrWengKB/HanziQuery/main/updates.md";
+            "https://raw.githubusercontent.com/MrWengKB/HanziQuery/main/version-history.md";
     // 发布说明里的「第 N 次构建」，N 与 App 的 versionCode 相同
     private static final Pattern BUILD_NO = Pattern.compile("第\\s*(\\d+)\\s*次构建");
 
@@ -133,7 +133,7 @@ public class MainActivity extends Activity {
                 String notes = null;
                 try {
                     String md = httpGet(UPDATES_URL, "text/plain");
-                    if (md != null) notes = markdownToText(md);
+                    if (md != null) notes = markdownToText(firstSection(md));
                 } catch (Exception ignored) {
                 }
 
@@ -161,6 +161,19 @@ public class MainActivity extends Activity {
                 .setPositiveButton("下载安装", (dialog, which) -> openExternal(Uri.parse(downloadUrl)))
                 .setNegativeButton("以后再说", null)
                 .show();
+    }
+
+    /** 取出第一个 # 标题及其下面的内容，到下一个 # 标题为止（即最新一个版本） */
+    private static String firstSection(String md) {
+        StringBuilder out = new StringBuilder();
+        boolean started = false;
+        for (String line : md.replace("\r\n", "\n").split("\n", -1)) {
+            boolean isHeading = line.trim().startsWith("#");
+            if (isHeading && started) break;   // 遇到第二个标题就停
+            if (isHeading) started = true;
+            if (started) out.append(line).append('\n');
+        }
+        return started ? out.toString() : md; // 文件里没有标题时就显示全部
     }
 
     /** 把 Markdown 简单转成适合弹窗显示的纯文字 */
