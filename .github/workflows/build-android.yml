@@ -53,6 +53,6 @@ jobs:
 
           gh release delete apk-latest --cleanup-tag -y || true
           gh release create apk-latest HanziQuery.apk \
-            --title "安卓离线版 ${VERSION:-（最新）}" \
+            --title "识读字查询 ${VERSION:-（最新）}" \
             --notes-file release-notes.md \
             --latest
