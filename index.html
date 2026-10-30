@@ -31,6 +31,7 @@
       cursor: pointer;
       vertical-align: middle;
     }
+    .readme-btn + .readme-btn { margin-left: 6px; }
     .readme-btn:hover { background: #eff6ff; }
     .readme-btn:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
 
@@ -120,7 +121,7 @@
 <div class="container">
   <header>
     <h1>小学华文识读字查询系统</h1>
-    <h2>第一次使用前请读<button type="button" class="readme-btn" id="readmeBtn">README</button></h2>
+    <h2>第一次使用前请读<button type="button" class="readme-btn" id="readmeBtn">README</button><button type="button" class="readme-btn" id="historyBtn">版本历史</button></h2>
     <!-- <h2>发音音频来自 <a href="https://github.com/hugolpz/audio-cmn/" target="_blank">hugolpz/audio-cmn</a> (CC-by-sa)</h2> -->
     <!-- 动态读取同目录 hanzilist.csv ，支持多音字多拼音展示、多字母智能筛选与综合检索 -->
 
@@ -252,11 +253,19 @@
 
 <script>
   (function () {
-    var btn = document.getElementById('readmeBtn');
     var modal = document.getElementById('readmeModal');
     var body = document.getElementById('readmeBody');
+    var title = document.getElementById('readmeTitle');
     var closeBtn = document.getElementById('readmeClose');
-    var loaded = false;
+
+    // 弹窗共用：每个按钮对应一个 Markdown 文件（可列多个文件名，按顺序尝试，兼容大小写）
+    var DOCS = [
+      { btn: 'readmeBtn',  title: 'README',   files: ['readme.md', 'README.md'] },
+      { btn: 'historyBtn', title: '版本历史', files: ['version-history.md', 'VERSION-HISTORY.md'] }
+    ];
+    var cache = {};       // 已读取过的内容，同一次打开页面内不重复下载
+    var current = null;   // 当前打开的是哪个
+    var lastBtn = null;   // 关闭后把焦点还给这个按钮
 
     // —— 轻量 Markdown 渲染（无外部依赖，离线 / 安卓 App 内也能用）——
     function esc(s) {
@@ -368,9 +377,8 @@
       return out.join('\n');
     }
 
-    // —— 读取 readme.md（兼容大小写不同的文件名）——
-    function fetchReadme() {
-      var names = ['readme.md', 'README.md'];
+    // —— 依次尝试文件名，读到第一个存在的 ——
+    function fetchDoc(names) {
       function tryNext(k) {
         if (k >= names.length) return Promise.reject(new Error('not found'));
         return fetch(names[k], { cache: 'no-cache' }).then(function (r) {
@@ -381,28 +389,37 @@
       return tryNext(0);
     }
 
-    function openModal() {
+    function openModal(doc, btnEl) {
+      current = doc;
+      lastBtn = btnEl;
+      title.textContent = doc.title;
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      body.scrollTop = 0;
       closeBtn.focus();
-      if (loaded) return;
-      body.innerHTML = '<p class="readme-msg">正在读取 readme.md…</p>';
-      fetchReadme().then(function (text) {
-        body.innerHTML = md(text);
-        loaded = true;
+      if (cache[doc.btn]) { body.innerHTML = cache[doc.btn]; return; }
+      var fname = doc.files[0];
+      body.innerHTML = '<p class="readme-msg">正在读取 ' + fname + '…</p>';
+      fetchDoc(doc.files).then(function (text) {
+        cache[doc.btn] = md(text);
+        if (current === doc) body.innerHTML = cache[doc.btn];
       }).catch(function () {
-        body.innerHTML = '<p class="readme-msg">无法读取 readme.md。请确认文件位于网站根目录；若是直接双击打开本地 HTML，浏览器会阻止读取，请通过网址访问。</p>';
+        if (current === doc) body.innerHTML = '<p class="readme-msg">无法读取 ' + fname + '。请确认文件位于网站根目录；若是直接双击打开本地 HTML，浏览器会阻止读取，请通过网址访问。</p>';
       });
     }
     function closeModal() {
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      btn.focus();
+      current = null;
+      if (lastBtn) lastBtn.focus();
     }
 
-    btn.addEventListener('click', openModal);
+    DOCS.forEach(function (doc) {
+      var el = document.getElementById(doc.btn);
+      if (el) el.addEventListener('click', function () { openModal(doc, el); });
+    });
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', function (e) {
