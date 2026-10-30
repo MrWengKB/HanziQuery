@@ -3,6 +3,8 @@ name: 构建安卓 APK
 on:
   push:
     branches: [main]
+    paths:
+      - version-history.md
   workflow_dispatch:
 
 permissions:
