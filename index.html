@@ -121,7 +121,7 @@
 <div class="container">
   <header>
     <h1>小学华文识读字查询系统</h1>
-    <h2>第一次使用前请读<button type="button" class="readme-btn" id="readmeBtn">README</button><button type="button" class="readme-btn" id="historyBtn">版本历史</button></h2>
+    <h2>第一次使用前请读<button type="button" class="readme-btn" id="readmeBtn">README</button><button type="button" class="readme-btn" id="historyBtn" title="版本历史" aria-label="版本历史">版本历史</button></h2>
     <!-- <h2>发音音频来自 <a href="https://github.com/hugolpz/audio-cmn/" target="_blank">hugolpz/audio-cmn</a> (CC-by-sa)</h2> -->
     <!-- 动态读取同目录 hanzilist.csv ，支持多音字多拼音展示、多字母智能筛选与综合检索 -->
 
@@ -261,7 +261,7 @@
     // 弹窗共用：每个按钮对应一个 Markdown 文件（可列多个文件名，按顺序尝试，兼容大小写）
     var DOCS = [
       { btn: 'readmeBtn',  title: 'README',   files: ['readme.md', 'README.md'] },
-      { btn: 'historyBtn', title: '版本历史', files: ['version-history.md', 'VERSION-HISTORY.md'] }
+      { btn: 'historyBtn', title: '版本历史', files: ['version-history.md', 'VERSION-HISTORY.md'], showVersion: true }
     ];
     var cache = {};       // 已读取过的内容，同一次打开页面内不重复下载
     var current = null;   // 当前打开的是哪个
@@ -418,7 +418,18 @@
 
     DOCS.forEach(function (doc) {
       var el = document.getElementById(doc.btn);
-      if (el) el.addEventListener('click', function () { openModal(doc, el); });
+      if (!el) return;
+      el.addEventListener('click', function () { openModal(doc, el); });
+
+      // 按钮文字显示当前版本号：取文件里第一个标题中的版本号（如「# 更新内容 v2.50」→ v2.50）
+      // 读不到时按钮保持「版本历史」
+      if (doc.showVersion) {
+        fetchDoc(doc.files).then(function (text) {
+          cache[doc.btn] = md(text);
+          var m = text.match(/^#{1,6}\s+.*?\b(v?\d+(?:\.\d+)+)/im);
+          if (m) el.textContent = /^v/i.test(m[1]) ? m[1] : 'v' + m[1];
+        }).catch(function () {});
+      }
     });
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
