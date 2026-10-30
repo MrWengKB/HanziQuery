@@ -9,6 +9,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -50,6 +53,9 @@ public class MainActivity extends Activity {
             "https://raw.githubusercontent.com/MrWengKB/HanziQuery/main/version-history.md";
     // 发布说明里的「第 N 次构建」，N 与 App 的 versionCode 相同
     private static final Pattern BUILD_NO = Pattern.compile("第\\s*(\\d+)\\s*次构建");
+    // Markdown：# 标题、- 列表
+    private static final Pattern MD_HEADING = Pattern.compile("^#{1,6}\\s*(.*)$");
+    private static final Pattern MD_LIST_ITEM = Pattern.compile("^[-*+]\\s+(.*)$");
 
     // 如果详情弹窗开着，返回键先关闭弹窗
     private static final String CLOSE_MODAL_JS =
@@ -130,15 +136,15 @@ public class MainActivity extends Activity {
                 }
 
                 // 读取更新内容；读不到也照样提示更新，只是不显示内容
-                String notes = null;
+                CharSequence notes = null;
                 try {
                     String md = httpGet(UPDATES_URL, "text/plain");
-                    if (md != null) notes = markdownToText(firstSection(md));
+                    if (md != null) notes = markdownToStyled(firstSection(md));
                 } catch (Exception ignored) {
                 }
 
                 final String downloadUrl = url;
-                final String updateNotes = notes;
+                final CharSequence updateNotes = notes;
                 runOnUiThread(() -> showUpdateDialog(downloadUrl, updateNotes));
             } catch (Exception ignored) {
                 // 没网、超时、GitHub 暂时不可用：都静默跳过
@@ -146,18 +152,18 @@ public class MainActivity extends Activity {
         }).start();
     }
 
-    private void showUpdateDialog(String downloadUrl, String notes) {
+    private void showUpdateDialog(String downloadUrl, CharSequence notes) {
         if (isFinishing() || isDestroyed()) return;
 
-        StringBuilder msg = new StringBuilder("有新版本可以下载。");
-        if (notes != null && !notes.isEmpty()) {
+        SpannableStringBuilder msg = new SpannableStringBuilder("有新版本可以下载。");
+        if (notes != null && notes.length() > 0) {
             msg.append("\n\n").append(notes);
         }
         msg.append("\n\n是否下载并安装？下载完成后点开 APK 安装，就会直接覆盖旧版本。");
 
         new AlertDialog.Builder(this)
                 .setTitle("发现新版本")
-                .setMessage(msg.toString()) // 内容太长时弹窗会自动出现滚动条
+                .setMessage(msg) // 内容太长时弹窗会自动出现滚动条
                 .setPositiveButton("下载安装", (dialog, which) -> openExternal(Uri.parse(downloadUrl)))
                 .setNegativeButton("以后再说", null)
                 .show();
@@ -176,17 +182,38 @@ public class MainActivity extends Activity {
         return started ? out.toString() : md; // 文件里没有标题时就显示全部
     }
 
-    /** 把 Markdown 简单转成适合弹窗显示的纯文字 */
-    private static String markdownToText(String md) {
-        StringBuilder out = new StringBuilder();
-        for (String line : md.replace("\r\n", "\n").split("\n", -1)) {
-            String t = line.replaceAll("^\\s*#{1,6}\\s*", "")          // # 标题
-                           .replaceAll("^(\\s*)[-*+]\\s+", "$1• ")      // - 列表
-                           .replaceAll("\\[([^\\]]*)\\]\\([^)]*\\)", "$1") // [文字](链接)
-                           .replace("**", "").replace("__", "").replace("`", "");
-            out.append(t).append('\n');
+    /** 把 Markdown 转成带格式的文字：# 标题加粗放大，- 列表变成「•」，**粗体** 加粗 */
+    private static CharSequence markdownToStyled(String md) {
+        return Html.fromHtml(markdownToHtml(md), Html.FROM_HTML_MODE_LEGACY);
+    }
+
+    private static String markdownToHtml(String md) {
+        StringBuilder html = new StringBuilder();
+        for (String raw : md.replace("\r\n", "\n").split("\n", -1)) {
+            String line = raw.trim();
+            Matcher h = MD_HEADING.matcher(line);
+            Matcher li = MD_LIST_ITEM.matcher(line);
+            if (line.isEmpty()) {
+                html.append("<br>");
+            } else if (h.matches()) {
+                html.append("<b><big>").append(inlineHtml(h.group(1))).append("</big></b><br>");
+            } else if (li.matches()) {
+                html.append("&#8226;&nbsp;").append(inlineHtml(li.group(1))).append("<br>");
+            } else {
+                html.append(inlineHtml(line)).append("<br>");
+            }
         }
-        return out.toString().replaceAll("\n{3,}", "\n\n").trim();
+        return html.toString()
+                .replaceAll("(<br>){3,}", "<br><br>")   // 多个空行合并
+                .replaceAll("(<br>)+$", "");            // 去掉结尾空行
+    }
+
+    /** 行内格式：先转义 HTML 特殊字符，再处理 **粗体**、[文字](链接)、`代码` */
+    private static String inlineHtml(String text) {
+        return TextUtils.htmlEncode(text)
+                .replaceAll("\\[([^\\]]*)\\]\\([^)]*\\)", "$1")
+                .replaceAll("\\*\\*(.+?)\\*\\*", "<b>$1</b>")
+                .replace("`", "");
     }
 
     /** GET 请求，成功返回内容（UTF-8），否则返回 null */
