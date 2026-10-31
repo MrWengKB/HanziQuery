@@ -22,13 +22,17 @@ const CORE_FILES = [
   'icons/icon-192.png',
   'icons/icon-512.png',
   'icons/apple-touch-icon.png',
-  'README.md'
+  'README.md',
+  'version-history.md'
 ];
 const FONT_FILES = ['kaiti.ttf', 'FZ-oracle.ttf'];
 
 self.addEventListener('install', event => {
   event.waitUntil(Promise.all([
-    caches.open(CORE_CACHE).then(c => c.addAll(CORE_FILES.map(u => new Request(u, { cache: 'reload' })))),
+    // 逐个缓存：某个文件不存在（例如改名或删除）时只跳过它，不会让整个离线功能失效
+    caches.open(CORE_CACHE).then(c => Promise.all(CORE_FILES.map(u =>
+      c.add(new Request(u, { cache: 'reload' })).catch(err => console.warn('[sw] 跳过', u, err))
+    ))),
     caches.open(FONT_CACHE).then(c => c.addAll(FONT_FILES))
   ]).then(() => self.skipWaiting()));
 });
