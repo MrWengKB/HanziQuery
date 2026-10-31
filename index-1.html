@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小学华文识读字查询系统</title>
+  <!-- 引入样式文件 -->
+  <link rel="stylesheet" href="style.css?v=4">
+  <!-- PWA：可添加到主屏幕、离线使用 -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f8fafc">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="识读字查询">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- README 按钮与弹窗样式（独立类名，不影响 style.css 里的原有弹窗） -->
+  <style>
+    .readme-btn {
+      margin-left: 8px;
+      padding: 2px 10px;
+      font-size: 0.8em;
+      font-weight: 600;
+      line-height: 1.6;
+      color: #2563eb;
+      background: #fff;
+      border: 1px solid #93c5fd;
+      border-radius: 999px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    .readme-btn + .readme-btn { margin-left: 6px; }
+    .readme-btn:hover { background: #eff6ff; }
+    .readme-btn:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+    a.readme-btn { display: inline-block; text-decoration: none; }
+    a.readme-btn[hidden] { display: none; }
+
+    .readme-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .readme-overlay.open { display: flex; }
+    .readme-dialog {
+      position: relative;
+      width: 100%;
+      max-width: 760px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+    }
+    .readme-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .readme-head h3 { margin: 0; font-size: 1rem; color: #334155; }
+    .readme-close {
+      width: 32px; height: 32px;
+      font-size: 22px; line-height: 1;
+      color: #64748b;
+      background: none; border: none; border-radius: 6px;
+      cursor: pointer;
+    }
+    .readme-close:hover { background: #e2e8f0; color: #0f172a; }
+    .readme-body {
+      padding: 16px 20px 24px;
+      overflow-y: auto;
+      color: #1e293b;
+      line-height: 1.75;
+      text-align: left;
+      word-wrap: break-word;
+    }
+    .readme-body h1, .readme-body h2, .readme-body h3,
+    .readme-body h4, .readme-body h5, .readme-body h6 {
+      margin: 1.2em 0 0.5em; line-height: 1.35; color: #0f172a;
+    }
+    .readme-body h1 { font-size: 1.5em; padding-bottom: .3em; border-bottom: 1px solid #e2e8f0; }
+    .readme-body h2 { font-size: 1.25em; padding-bottom: .25em; border-bottom: 1px solid #f1f5f9; }
+    .readme-body h3 { font-size: 1.1em; }
+    .readme-body > :first-child { margin-top: 0; }
+    .readme-body p { margin: 0.6em 0; }
+    .readme-body ul, .readme-body ol { margin: 0.6em 0; padding-left: 1.6em; }
+    .readme-body a { color: #2563eb; }
+    .readme-body code {
+      padding: 1px 5px; font-size: 0.9em;
+      background: #f1f5f9; border-radius: 4px;
+    }
+    .readme-body pre {
+      padding: 12px; overflow-x: auto;
+      background: #f1f5f9; border-radius: 8px;
+    }
+    .readme-body pre code { padding: 0; background: none; }
+    .readme-body blockquote {
+      margin: 0.8em 0; padding: 4px 12px;
+      color: #475569; border-left: 4px solid #cbd5e1;
+    }
+    .readme-body hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.2em 0; }
+    .readme-body img { max-width: 100%; }
+    .readme-body .table-wrap { overflow-x: auto; }
+    .readme-body table { border-collapse: collapse; margin: 0.8em 0; }
+    .readme-body th, .readme-body td { padding: 6px 10px; border: 1px solid #e2e8f0; }
+    .readme-body th { background: #f8fafc; }
+    .readme-msg { color: #64748b; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>小学华文识读字查询系统</h1>
+    <h2>第一次使用前请读<button type="button" class="readme-btn" id="readmeBtn">README</button><button type="button" class="readme-btn" id="historyBtn" title="版本历史" aria-label="版本历史">版本历史</button><a class="readme-btn" id="apkBtn" href="https://github.com/MrWengKB/HanziQuery/releases/download/apk-latest/HanziQuery.apk" title="下载安卓 APP" hidden>安卓APP</a></h2>
+    <script>
+      // 「安卓APP」按钮只在网页版和 PWA 显示；安卓 App 里（appassets.androidplatform.net）保持隐藏
+      if (location.hostname !== 'appassets.androidplatform.net') {
+        document.getElementById('apkBtn').hidden = false;
+      }
+    </script>
+    <!-- <h2>发音音频来自 <a href="https://github.com/hugolpz/audio-cmn/" target="_blank">hugolpz/audio-cmn</a> (CC-by-sa)</h2> -->
+    <!-- 动态读取同目录 hanzilist.csv ，支持多音字多拼音展示、多字母智能筛选与综合检索 -->
+
+  </header>
+
+  <!-- 备用导入提示条 -->
+  <div class="notice-bar" id="noticeBar">
+    <span id="noticeMsg">提示：若直接双击HTML打开受浏览器安全限制未能自动读取CSV，可点右侧手动指定同目录下的 hanzilist.csv：</span>
+    <button class="notice-btn" onclick="document.getElementById('csvFileInput').click()">选择 hanzilist.csv</button>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleFileSelect(event)">
+  </div>
+
+  <!-- 筛选控件区域 -->
+  <div class="filter-card">
+    <div class="search-row">
+      <input type="text" id="searchInput" class="search-input" placeholder="输入汉字（如“长”）、任一拼音（无需调号，如chang；v = ü）或课文词语（如“希望”）" autocomplete="off">
+    </div>
+
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="gradeFilter">年级</label>
+        <select id="gradeFilter">
+          <option value="">全部年级</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="lessonFilter">课次</label>
+        <select id="lessonFilter">
+          <option value="">全部课次</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="structFilter">汉字结构</label>
+        <select id="structFilter">
+          <option value="">全部结构</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="initialFilter">拼音首字母</label>
+        <select id="initialFilter">
+          <option value="">全部首字母 (A-Z)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="finalFilter">韵母</label>
+        <select id="finalFilter">
+          <option value="">全部韵母</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="radicalFilter">部首</label>
+        <select id="radicalFilter">
+          <option value="">全部部首</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="strokeFilter">笔画数</label>
+        <select id="strokeFilter">
+          <option value="">全部笔画</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <div class="stats">
+        共找到 <span id="matchCount">0</span> 个生字（总库 <span id="totalCount">0</span> 字）
+      </div>
+      <button class="reset-btn" id="resetBtn" type="button">重置所有筛选</button>
+    </div>
+  </div>
+
+  <!-- 卡片列表渲染区域 -->
+  <div class="results-grid" id="charGrid"></div>
+</div>
+
+<!-- 汉字详情弹窗 -->
+<div class="modal-overlay" id="charModal">
+  <div class="modal-content">
+    <div class="modal-char-view">
+      <div class="modal-pinyin" id="modalPinyin"></div>
+      <div class="modal-char-big" id="modalChar"></div>
+      <button type="button" class="oracle-toggle" id="oracleToggle" aria-pressed="false">甲骨文</button>
+    </div>
+    <div class="modal-details">
+      <div class="detail-item">
+        <span class="detail-label">年级</span>
+        <span class="detail-value" id="modalGrade"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">课次</span>
+        <span class="detail-value" id="modalLesson"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">汉字结构</span>
+        <span class="detail-value" id="modalStruct"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">部首</span>
+        <span class="detail-value" id="modalRadical"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">笔画数</span>
+        <span class="detail-value" id="modalStrokes"></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">课文词语</span>
+        <span class="detail-value" id="modalWords"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- README 弹窗 -->
+<div class="readme-overlay" id="readmeModal" aria-hidden="true">
+  <div class="readme-dialog" role="dialog" aria-modal="true" aria-labelledby="readmeTitle">
+    <div class="readme-head">
+      <h3 id="readmeTitle">README</h3>
+      <button type="button" class="readme-close" id="readmeClose" aria-label="关闭">&times;</button>
+    </div>
+    <div class="readme-body" id="readmeBody"></div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var modal = document.getElementById('readmeModal');
+    var body = document.getElementById('readmeBody');
+    var title = document.getElementById('readmeTitle');
+    var closeBtn = document.getElementById('readmeClose');
+
+    // 弹窗共用：每个按钮对应一个 Markdown 文件（可列多个文件名，按顺序尝试，兼容大小写）
+    var DOCS = [
+      { btn: 'readmeBtn',  title: 'README',   files: ['readme.md', 'README.md'] },
+      { btn: 'historyBtn', title: '版本历史', files: ['version-history.md', 'VERSION-HISTORY.md'], showVersion: true }
+    ];
+    var cache = {};       // 已读取过的内容，同一次打开页面内不重复下载
+    var current = null;   // 当前打开的是哪个
+    var lastBtn = null;   // 关闭后把焦点还给这个按钮
+
+    // —— 轻量 Markdown 渲染（无外部依赖，离线 / 安卓 App 内也能用）——
+    function esc(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function safeUrl(u) {
+      return /^\s*javascript:/i.test(u) ? '#' : u;
+    }
+    function inline(s) {
+      var codes = [];
+      s = esc(s);
+      s = s.replace(/`([^`]+)`/g, function (m, c) { codes.push(c); return '\u0000' + (codes.length - 1) + '\u0000'; });
+      // 允许 Markdown 里直接写的 <a href="...">文字</a>，先存起来，避免网址里的 _ * 被当成粗体斜体
+      var anchors = [];
+      s = s.replace(/&lt;a\s[\s\S]*?href=(?:&quot;(.*?)&quot;|'(.*?)')[\s\S]*?&gt;([\s\S]*?)&lt;\/a&gt;/gi, function (m, h1, h2, text) {
+        var href = (h1 || h2 || '').replace(/&amp;/g, '&');
+        anchors.push('<a href="' + esc(safeUrl(href)) + '" target="_blank" rel="noopener">');
+        return '\u0001' + (anchors.length - 1) + '\u0001' + text + '\u0002';
+      });
+      s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g, function (m, alt, src) {
+        return '<img alt="' + alt + '" src="' + safeUrl(src) + '">';
+      });
+      s = s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;)?\)/g, function (m, text, href) {
+        return '<a href="' + safeUrl(href) + '" target="_blank" rel="noopener">' + text + '</a>';
+      });
+      s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      s = s.replace(/\*([^*\s][^*]*)\*/g, '<em>$1</em>');
+      s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+      // 允许 Markdown 里直接写的 <br>、<br/>、<br /> 换行（代码里的不受影响）
+      s = s.replace(/&lt;br\s*\/?&gt;/gi, '<br>');
+      s = s.replace(/\u0001(\d+)\u0001/g, function (m, i) { return anchors[i]; }).replace(/\u0002/g, '</a>');
+      s = s.replace(/\u0000(\d+)\u0000/g, function (m, i) { return '<code>' + codes[i] + '</code>'; });
+      return s;
+    }
+    function splitRow(line) {
+      return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(function (c) { return c.trim(); });
+    }
+    var reFence = /^\s*(```|~~~)/;
+    var reHead = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
+    var reHr = /^\s*([-*_])(\s*\1){2,}\s*$/;
+    var reQuote = /^\s*>\s?/;
+    var reList = /^\s*([-*+]|\d+[.)])\s+(.*)$/;
+    var reTableSep = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+
+    function md(src) {
+      var lines = src.replace(/\r\n?/g, '\n').split('\n');
+      var out = [], i = 0, m;
+      while (i < lines.length) {
+        var line = lines[i];
+        if (!line.trim()) { i++; continue; }
+
+        if (reFence.test(line)) {                       // 代码块
+          var fence = line.trim().slice(0, 3), code = [];
+          i++;
+          while (i < lines.length && lines[i].trim().indexOf(fence) !== 0) code.push(lines[i++]);
+          i++;
+          out.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>');
+          continue;
+        }
+        if ((m = line.match(reHead))) {                 // 标题
+          var n = m[1].length;
+          out.push('<h' + n + '>' + inline(m[2]) + '</h' + n + '>');
+          i++; continue;
+        }
+        if (reHr.test(line)) { out.push('<hr>'); i++; continue; }   // 分隔线
+        if (reQuote.test(line)) {                       // 引用
+          var q = [];
+          while (i < lines.length && reQuote.test(lines[i])) q.push(lines[i++].replace(reQuote, ''));
+          out.push('<blockquote>' + md(q.join('\n')) + '</blockquote>');
+          continue;
+        }
+        if (line.indexOf('|') !== -1 && i + 1 < lines.length && reTableSep.test(lines[i + 1])) {  // 表格
+          var head = splitRow(line), rows = [];
+          i += 2;
+          while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') !== -1) rows.push(splitRow(lines[i++]));
+          var t = '<div class="table-wrap"><table><thead><tr>' +
+            head.map(function (c) { return '<th>' + inline(c) + '</th>'; }).join('') + '</tr></thead><tbody>';
+          rows.forEach(function (r) {
+            t += '<tr>' + r.map(function (c) { return '<td>' + inline(c) + '</td>'; }).join('') + '</tr>';
+          });
+          out.push(t + '</tbody></table></div>');
+          continue;
+        }
+        if ((m = line.match(reList))) {                 // 列表
+          var ordered = /\d/.test(m[1]), items = [];
+          while (i < lines.length) {
+            var lm = lines[i].match(reList);
+            if (lm) { items.push(lm[2]); i++; }
+            else if (lines[i].trim() && /^\s{2,}/.test(lines[i]) && items.length) { items[items.length - 1] += ' ' + lines[i].trim(); i++; }
+            else break;
+          }
+          var tag = ordered ? 'ol' : 'ul';
+          out.push('<' + tag + '>' + items.map(function (it) { return '<li>' + inline(it) + '</li>'; }).join('') + '</' + tag + '>');
+          continue;
+        }
+        var para = [];                                  // 段落
+        while (i < lines.length && lines[i].trim() &&
+               !reFence.test(lines[i]) && !reHead.test(lines[i]) && !reHr.test(lines[i]) &&
+               !reQuote.test(lines[i]) && !reList.test(lines[i])) {
+          para.push(lines[i++]);
+        }
+        if (!para.length) { para.push(lines[i++]); }
+        out.push('<p>' + para.map(function (p) {
+          // 行末两个空格 = 换行
+          return inline(p.replace(/\s+$/, '')) + (/ {2,}$/.test(p) ? '<br>' : '');
+        }).join('\n') + '</p>');
+      }
+      return out.join('\n');
+    }
+
+    // —— 依次尝试文件名，读到第一个存在的 ——
+    function fetchDoc(names) {
+      function tryNext(k) {
+        if (k >= names.length) return Promise.reject(new Error('not found'));
+        return fetch(names[k], { cache: 'no-cache' }).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.text();
+        }).catch(function () { return tryNext(k + 1); });
+      }
+      return tryNext(0);
+    }
+
+    function openModal(doc, btnEl) {
+      current = doc;
+      lastBtn = btnEl;
+      title.textContent = doc.title;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      body.scrollTop = 0;
+      closeBtn.focus();
+      if (cache[doc.btn]) { body.innerHTML = cache[doc.btn]; return; }
+      var fname = doc.files[0];
+      body.innerHTML = '<p class="readme-msg">正在读取 ' + fname + '…</p>';
+      fetchDoc(doc.files).then(function (text) {
+        cache[doc.btn] = md(text);
+        if (current === doc) body.innerHTML = cache[doc.btn];
+      }).catch(function () {
+        if (current === doc) body.innerHTML = '<p class="readme-msg">无法读取 ' + fname + '。请确认文件位于网站根目录；若是直接双击打开本地 HTML，浏览器会阻止读取，请通过网址访问。</p>';
+      });
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      current = null;
+      if (lastBtn) lastBtn.focus();
+    }
+
+    DOCS.forEach(function (doc) {
+      var el = document.getElementById(doc.btn);
+      if (!el) return;
+      el.addEventListener('click', function () { openModal(doc, el); });
+
+      // 按钮文字显示当前版本号：取文件里第一个标题中的版本号（如「# 更新内容 v2.50」→ v2.50）
+      // 读不到时按钮保持「版本历史」
+      if (doc.showVersion) {
+        fetchDoc(doc.files).then(function (text) {
+          cache[doc.btn] = md(text);
+          var m = text.match(/^#{1,6}\s+.*?\b(v?\d+(?:\.\d+)+)/im);
+          if (m) el.textContent = /^v/i.test(m[1]) ? m[1] : 'v' + m[1];
+        }).catch(function () {});
+      }
+    });
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+  })();
+</script>
+
+<!-- 模块化引入 JS 脚本（注意引入顺序：工具/弹窗优先，入口 app 随后） -->
+<script src="js/parser.js?v=7"></script>
+<script src="js/modal.js?v=6"></script>
+<script src="js/app.js?v=7"></script>
+<!-- 注册离线缓存（安卓 App 里已自带离线文件，不需要注册） -->
+<script>
+  if ('serviceWorker' in navigator && location.hostname !== 'appassets.androidplatform.net') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+
+</body>
+</html>
