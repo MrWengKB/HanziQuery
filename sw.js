@@ -18,11 +18,10 @@ const CORE_FILES = [
   'js/parser.js',
   'js/modal.js',
   'js/app.js',
-  'js/oracle.js',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
-  'icons/apple-touch-icon.png'
+  'icons/apple-touch-icon.png',
   'README.md'
 ];
 const FONT_FILES = ['kaiti.ttf', 'FZ-oracle.ttf'];
