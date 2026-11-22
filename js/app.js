@@ -34,14 +34,23 @@ function populateSelect(selectEl, values, defaultLabel, formatter = v => v) {
 function initFilters() {
   totalCount.textContent = window.DATA.length;
 
-  const grades = [...new Set(window.DATA.map(d => d.grade).filter(Boolean))].sort();
+  // 把「一年级」「第十九课」里的中文数字（或阿拉伯数字）转成数值，用于排序
+  const toNum = s => {
+    const digits = s.match(/\d+/);
+    if (digits) return parseInt(digits[0], 10);
+    const map = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+    const cn = (s.match(/[零一二两三四五六七八九十]+/) || [''])[0];
+    if (!cn) return 0;
+    if (!cn.includes('十')) return map[cn] ?? 0;
+    const [tens, ones] = cn.split('十');
+    return (tens ? map[tens] : 1) * 10 + (ones ? map[ones] : 0);
+  };
+  const byNum = (a, b) => toNum(a) - toNum(b);
+
+  const grades = [...new Set(window.DATA.map(d => d.grade).filter(Boolean))].sort(byNum);
   populateSelect(gradeFilter, grades, '全部年级');
 
-  const lessons = [...new Set(window.DATA.map(d => d.lesson).filter(Boolean))].sort((a, b) => {
-    const numA = parseInt(a.replace(/\D/g, '')) || 0;
-    const numB = parseInt(b.replace(/\D/g, '')) || 0;
-    return numA - numB;
-  });
+  const lessons = [...new Set(window.DATA.map(d => d.lesson).filter(Boolean))].sort(byNum);
   populateSelect(lessonFilter, lessons, '全部课次');
 
   const structs = [...new Set(window.DATA.map(d => d.structure).filter(Boolean))].sort();
