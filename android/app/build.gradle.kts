@@ -13,15 +13,15 @@ val copyWeb by tasks.registering(Sync::class) {
     into(webAssetsDir.map { it.dir("www") })
 }
 
-// 从 version-history.md 第一个 # 标题读出版本号，例如「# 更新内容 v2.51」→「2.51」
+// 从 version-history.md 第一个 # 标题读出版本号，例如「# 更新内容 v2.5.1」→「2.5.1」
 fun latestVersionName(): String {
     // 注意：在 Gradle 脚本里 "java" 指的是 Java 插件设定，不能写 java.io.File，所以用 webRoot.resolve
     val historyFile = webRoot.resolve("version-history.md")
-    if (!historyFile.exists()) return "0.0"
-    val heading = historyFile.readLines(Charsets.UTF_8).firstOrNull { line -> line.trim().startsWith("#") } ?: return "0.0"
+    if (!historyFile.exists()) return "0.0.0"
+    val heading = historyFile.readLines(Charsets.UTF_8).firstOrNull { line -> line.trim().startsWith("#") } ?: return "0.0.0"
     val withV = Regex("""[vV]\s*(\d+(?:\.\d+)*)""").find(heading)
     val anyNumber = Regex("""(\d+(?:\.\d+)+)""").find(heading)
-    return (withV ?: anyNumber)?.groupValues?.get(1) ?: "0.0"
+    return (withV ?: anyNumber)?.groupValues?.get(1) ?: "0.0.0"
 }
 
 android {

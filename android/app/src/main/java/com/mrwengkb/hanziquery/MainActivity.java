@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
             "https://api.github.com/repos/MrWengKB/HanziQuery/releases/tags/apk-latest";
     private static final String RELEASE_PAGE =
             "https://github.com/MrWengKB/HanziQuery/releases/tag/apk-latest";
-    // 版本号，例如 v2.56 → 2.56
+    // 版本号，例如 v2.5.6 → 2.5.6
     private static final Pattern VERSION_NO = Pattern.compile("[vV]\\s*(\\d+(?:\\.\\d+)*)");
     // 发布说明里的「第 N 次构建」，N 与 App 的 versionCode 相同
     private static final Pattern BUILD_NO = Pattern.compile("第\\s*(\\d+)\\s*次构建");
@@ -142,7 +142,7 @@ public class MainActivity extends Activity {
                     notes = markdownToStyled(firstSection(body));
                 }
 
-                // 最新版本号：取自发布标题，例如「安卓离线版 v2.56」
+                // 最新版本号：取自发布标题，例如「识读字查询 v2.5.6」
                 Matcher vm = VERSION_NO.matcher(release.optString("name", ""));
                 final String latestVersion = vm.find() ? vm.group(1) : null;
 
@@ -252,11 +252,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** 当前安装的版本名称（取自 version-history.md，例如 2.55）；读不到时返回 null */
+    /** 当前安装的版本名称（取自 version-history.md，例如 2.5.5）；读不到时返回 null */
     private String currentVersionName() {
         try {
             String name = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-            if (name == null || name.isEmpty() || name.equals("0.0")) return null;
+            if (name == null || name.isEmpty() || name.equals("0.0") || name.equals("0.0.0")) return null;
             return name.replaceFirst("^[vV]", "");
         } catch (PackageManager.NameNotFoundException e) {
             return null;

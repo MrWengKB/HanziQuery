@@ -438,7 +438,7 @@
       if (!el) return;
       el.addEventListener('click', function () { openModal(doc, el); });
 
-      // 按钮文字显示当前版本号：取文件里第一个标题中的版本号（如「# 更新内容 v2.50」→ v2.50）
+      // 按钮文字显示当前版本号：取文件里第一个标题中的版本号（如「# 更新内容 v2.5.0」→ v2.5.0）
       // 读不到时按钮保持「版本历史」
       if (doc.showVersion) {
         fetchDoc(doc.files).then(function (text) {
