@@ -540,3 +540,10 @@ header p {
 .site-footer a:hover {
   text-decoration: underline;
 }
+
+/* 窄屏（手机）：拼音往下移，不和左上角的「106 / 1184」重叠 */
+@media (max-width: 480px) {
+  .modal-pinyin {
+    padding-top: 18px;
+  }
+}
