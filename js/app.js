@@ -9,6 +9,7 @@ const gradeFilter = document.getElementById('gradeFilter');
 const lessonFilter = document.getElementById('lessonFilter');
 const structFilter = document.getElementById('structFilter');
 const initialFilter = document.getElementById('initialFilter');
+const shengmuFilter = document.getElementById('shengmuFilter');
 const finalFilter = document.getElementById('finalFilter');
 const radicalFilter = document.getElementById('radicalFilter');
 const strokeFilter = document.getElementById('strokeFilter');
@@ -63,6 +64,16 @@ function initFilters() {
   const initials = [...allInitials].sort();
   populateSelect(initialFilter, initials, '全部首字母 (A-Z)');
 
+  // 声母按声母表的顺序排列，零声母放最后
+  const SHENGMU_ORDER = ['b','p','m','f','d','t','n','l','g','k','h','j','q','x','zh','ch','sh','r','z','c','s','y','w'];
+  const smRank = s => s === NONE_SHENGMU ? 999 : (SHENGMU_ORDER.indexOf(s) === -1 ? 500 : SHENGMU_ORDER.indexOf(s));
+  const allShengmus = new Set();
+  window.DATA.forEach(d => {
+    (d.shengmus || []).forEach(s => allShengmus.add(s));
+  });
+  const shengmus = [...allShengmus].sort((a, b) => smRank(a) - smRank(b) || a.localeCompare(b));
+  populateSelect(shengmuFilter, shengmus, '全部声母', s => s === NONE_SHENGMU ? '零声母（如 ā、ér）' : s);
+
   const allFinals = new Set();
   window.DATA.forEach(d => {
     d.finals.forEach(f => allFinals.add(f));
@@ -84,6 +95,7 @@ function renderList() {
   const lesson = lessonFilter.value;
   const struct = structFilter.value;
   const initial = initialFilter.value;
+  const shengmu = shengmuFilter.value;
   const final = finalFilter.value;
   const radical = radicalFilter.value;
   const stroke = strokeFilter.value;
@@ -102,6 +114,7 @@ function renderList() {
     if (lesson && item.lesson !== lesson) return false;
     if (struct && item.structure !== struct) return false;
     if (initial && !item.initials.includes(initial)) return false;
+    if (shengmu && !(item.shengmus || []).includes(shengmu)) return false;
     if (final && !item.finals.includes(final)) return false;
     if (radical && item.radical !== radical) return false;
     if (stroke && item.strokes !== parseInt(stroke, 10)) return false;
@@ -115,7 +128,7 @@ function renderList() {
   matchCount.textContent = filtered.length;
   // 没有任何查询或筛选时，只显示前 30 个字
   const INITIAL_LIMIT = 30;
-  const hasFilter = query || grade || lesson || struct || initial || final || radical || stroke;
+  const hasFilter = query || grade || lesson || struct || initial || shengmu || final || radical || stroke;
   const shown = hasFilter ? filtered : filtered.slice(0, INITIAL_LIMIT);
 
   if (filtered.length === 0) {
@@ -145,7 +158,7 @@ function renderList() {
 }
 
 // 监听各输入项变更
-[searchInput, gradeFilter, lessonFilter, structFilter, initialFilter, finalFilter, radicalFilter, strokeFilter].forEach(el => {
+[searchInput, gradeFilter, lessonFilter, structFilter, initialFilter, shengmuFilter, finalFilter, radicalFilter, strokeFilter].forEach(el => {
   if (el) {
     el.addEventListener('input', renderList);
     el.addEventListener('change', renderList);
@@ -160,6 +173,7 @@ if (resetBtn) {
     lessonFilter.value = '';
     structFilter.value = '';
     initialFilter.value = '';
+    shengmuFilter.value = '';
     finalFilter.value = '';
     radicalFilter.value = '';
     strokeFilter.value = '';

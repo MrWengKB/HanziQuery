@@ -15,6 +15,9 @@ function getInitial(py) {
   return plain ? plain.charAt(0).toUpperCase() : '';
 }
 
+// 零声母（声母栏留空）在筛选里用这个值表示
+const NONE_SHENGMU = '__none__';
+
 // 解析 CSV 文本为汉字对象数组
 function parseCSV(text) {
   if (text.charCodeAt(0) === 0xFEFF) {
@@ -41,6 +44,14 @@ function parseCSV(text) {
   headers.forEach((h, idx) => {
     if (h.includes('拼音')) {
       pinyinColIndices.push(idx);
+    }
+  });
+
+  // 声母1 对应拼音1，声母2 对应拼音2；零声母的字（如「二」「爱」）留空
+  const shengmuColIndices = [];
+  headers.forEach((h, idx) => {
+    if (h.includes('声母')) {
+      shengmuColIndices.push(idx);
     }
   });
 
@@ -105,6 +116,17 @@ function parseCSV(text) {
       }
     });
 
+    // 提取并聚合声母（多音字去重）；只要有一个读音是零声母，就记为 NONE_SHENGMU
+    const shengmus = [];
+    shengmuColIndices.forEach((idx, k) => {
+      const val = row[idx];
+      const hasPinyin = pinyinColIndices[k] !== undefined && row[pinyinColIndices[k]];
+      const sm = val || (hasPinyin ? NONE_SHENGMU : '');
+      if (sm && !shengmus.includes(sm)) {
+        shengmus.push(sm);
+      }
+    });
+
     // 课文词语（一格可存多个，用同样的分隔符拆开；只用于搜索，不建筛选下拉框）
     const words = [];
     if (wordsColIndex !== -1) {
@@ -127,6 +149,7 @@ function parseCSV(text) {
       pinyin_plains: pinyinPlains,
       initials: initials,
       initial_display: initials.join(' / '),
+      shengmus: shengmus,
       finals: finals,
       final_display: finals.join(' / '),
       words: words,
