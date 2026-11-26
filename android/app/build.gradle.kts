@@ -38,8 +38,8 @@ android {
         versionName = latestVersionName()
     }
 
-    // 签名：优先使用 GitHub Secrets 里的上传密钥（打包时由 workflow 解码到 HQ_KEYSTORE_FILE）。
-    // 还没设置 Secrets 时暂时退回仓库里的旧密钥（过渡用，之后会删除）
+    // 签名：使用 GitHub Secrets 里的上传密钥（打包时由 workflow 解码到 HQ_KEYSTORE_FILE）。
+    // 密钥不放在仓库里；本机打包时自己设置这四个环境变量即可
     val ksFile = System.getenv("HQ_KEYSTORE_FILE")
     signingConfigs {
         create("release") {
@@ -48,11 +48,6 @@ android {
                 storePassword = System.getenv("HQ_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("HQ_KEY_ALIAS")
                 keyPassword = System.getenv("HQ_KEY_PASSWORD")
-            } else {
-                storeFile = file("hanziquery.keystore")
-                storePassword = "android"
-                keyAlias = "hanziquery"
-                keyPassword = "android"
             }
         }
     }

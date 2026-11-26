@@ -44,7 +44,8 @@ jobs:
             } >> "$GITHUB_ENV"
             echo "使用 GitHub Secrets 里的上传密钥"
           else
-            echo "::warning::还没有设置 ANDROID_KEYSTORE_BASE64，暂时使用仓库里的旧密钥"
+            echo "::error::没有设置 ANDROID_KEYSTORE_BASE64，无法签名"
+            exit 1
           fi
 
       - name: 编译 APK 和 AAB
