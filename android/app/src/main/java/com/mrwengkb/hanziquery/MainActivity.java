@@ -9,9 +9,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.graphics.Insets;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -38,6 +41,7 @@ import java.util.regex.Pattern;
  * 检查更新：启动时如果有网络，会查询 GitHub Releases 的 apk-latest，
  * 发现更新的构建编号就显示发布说明里的更新内容（打包时从 version-history.md 第一段写入），再问是否下载；
  * 没网或出错时静默跳过，不影响使用。
+ * Google Play 版（play 版本）不做这项检查，由 Play 商店负责更新。
  */
 public class MainActivity extends Activity {
 
@@ -74,7 +78,25 @@ public class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(0xFFF8FAFC);
-        setContentView(webView);
+
+        // Android 15 起 App 一律“边到边”显示：给状态栏、导航栏和刘海留出空间，网页不会被挡住
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xFFF8FAFC);
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int l, t, r, b;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Insets in = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                l = in.left; t = in.top; r = in.right; b = in.bottom;
+            } else {
+                l = insets.getSystemWindowInsetLeft(); t = insets.getSystemWindowInsetTop();
+                r = insets.getSystemWindowInsetRight(); b = insets.getSystemWindowInsetBottom();
+            }
+            v.setPadding(l, t, r, b);
+            return insets;
+        });
+        setContentView(root);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -101,7 +123,7 @@ public class MainActivity extends Activity {
 
         webView.loadUrl(START_URL);
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && BuildConfig.UPDATE_CHECK) {
             checkForUpdate();
         }
     }

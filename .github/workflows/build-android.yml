@@ -1,10 +1,12 @@
-name: 构建安卓 APK
+name: 构建安卓 APK 和 AAB
 
 on:
   push:
     branches: [main]
     paths:
       - version-history.md
+      - android/**
+      - .github/workflows/build-android.yml
   workflow_dispatch:
 
 permissions:
@@ -23,22 +25,47 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.7"
+          gradle-version: "8.11.1"
 
-      - name: 编译 APK
+      - name: 准备签名密钥（来自 GitHub Secrets）
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PW: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PW: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            {
+              echo "HQ_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks"
+              echo "HQ_KEYSTORE_PASSWORD=$KS_PW"
+              echo "HQ_KEY_ALIAS=$KEY_ALIAS"
+              echo "HQ_KEY_PASSWORD=$KEY_PW"
+            } >> "$GITHUB_ENV"
+            echo "使用 GitHub Secrets 里的上传密钥"
+          else
+            echo "::warning::还没有设置 ANDROID_KEYSTORE_BASE64，暂时使用仓库里的旧密钥"
+          fi
+
+      - name: 编译 APK 和 AAB
         working-directory: android
-        run: gradle assembleDebug --no-daemon
+        run: gradle assembleDirectRelease bundlePlayRelease --no-daemon
 
-      - name: 重命名 APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk HanziQuery.apk
+      - name: 重命名
+        run: |
+          cp android/app/build/outputs/apk/direct/release/app-direct-release.apk HanziQuery.apk
+          cp android/app/build/outputs/bundle/playRelease/app-play-release.aab HanziQuery.aab
+          ls -la HanziQuery.apk HanziQuery.aab
 
       - name: 保存为构建产物
         uses: actions/upload-artifact@v4
         with:
-          name: HanziQuery-apk
-          path: HanziQuery.apk
+          name: HanziQuery-android
+          path: |
+            HanziQuery.apk
+            HanziQuery.aab
 
-      - name: 发布到 Releases（手机可直接下载）
+      - name: 发布到 Releases（APK 和 AAB 分开，可直接下载）
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -46,13 +73,16 @@ jobs:
           awk '/^[[:space:]]*#/{n++} n==1' version-history.md > latest-notes.md
           VERSION=$(grep -oE '[vV][0-9]+(\.[0-9]+)*' latest-notes.md | head -1)
           {
-            echo "第 ${{ github.run_number }} 次构建。下载 HanziQuery.apk 安装即可离线使用。"
+            echo "第 ${{ github.run_number }} 次构建。"
+            echo
+            echo "- **HanziQuery.apk**：手机直接下载安装（需要允许安装未知来源应用），完全离线可用。"
+            echo "- **HanziQuery.aab**：上架 Google Play 用，手机不能直接安装（Play 版不含自动检查更新，由 Play 商店负责更新）。"
             echo
             cat latest-notes.md
           } > release-notes.md
 
           gh release delete apk-latest --cleanup-tag -y || true
-          gh release create apk-latest HanziQuery.apk \
+          gh release create apk-latest HanziQuery.apk HanziQuery.aab \
             --title "识读字查询 ${VERSION:-（最新）}" \
             --notes-file release-notes.md \
             --latest

@@ -8,7 +8,7 @@ val webAssetsDir = layout.buildDirectory.dir("webassets")
 
 val copyWeb by tasks.registering(Sync::class) {
     from(webRoot) {
-        include("index.html", "style.css", "hanzilist.csv", "*.ttf", "js/**", "audio/**", "README.md", "version-history.md")
+        include("index.html", "style.css", "hanzilist.csv", "*.ttf", "js/**", "audio/**", "README.md", "version-history.md", "privacy.html")
     }
     into(webAssetsDir.map { it.dir("www") })
 }
@@ -26,25 +26,60 @@ fun latestVersionName(): String {
 
 android {
     namespace = "com.mrwengkb.hanziquery"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mrwengkb.hanziquery"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         // 每次 GitHub Actions 构建自动递增版本号，方便覆盖安装
         versionCode = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
         // 显示给用户看的版本名称，取自 version-history.md 的最新版本
         versionName = latestVersionName()
     }
 
-    // 固定签名：每次构建签名一致，新版才能直接覆盖安装旧版
+    // 签名：优先使用 GitHub Secrets 里的上传密钥（打包时由 workflow 解码到 HQ_KEYSTORE_FILE）。
+    // 还没设置 Secrets 时暂时退回仓库里的旧密钥（过渡用，之后会删除）
+    val ksFile = System.getenv("HQ_KEYSTORE_FILE")
     signingConfigs {
-        getByName("debug") {
-            storeFile = file("hanziquery.keystore")
-            storePassword = "android"
-            keyAlias = "hanziquery"
-            keyPassword = "android"
+        create("release") {
+            if (!ksFile.isNullOrEmpty()) {
+                storeFile = file(ksFile)
+                storePassword = System.getenv("HQ_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("HQ_KEY_ALIAS")
+                keyPassword = System.getenv("HQ_KEY_PASSWORD")
+            } else {
+                storeFile = file("hanziquery.keystore")
+                storePassword = "android"
+                keyAlias = "hanziquery"
+                keyPassword = "android"
+            }
+        }
+    }
+
+    // 两个版本：
+    //   direct：直接下载安装的 APK，启动时检查 GitHub 上有没有新版本，由用户决定安装或忽略
+    //   play：上架 Google Play 的 AAB，不能自己检查/下载更新（Play 政策规定只能由 Play 更新）
+    flavorDimensions += "dist"
+    productFlavors {
+        create("direct") {
+            dimension = "dist"
+            buildConfigField("boolean", "UPDATE_CHECK", "true")
+        }
+        create("play") {
+            dimension = "dist"
+            buildConfigField("boolean", "UPDATE_CHECK", "false")
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -57,6 +92,11 @@ android {
         getByName("main") {
             assets.srcDir(webAssetsDir.get().asFile)
         }
+    }
+
+    // 音频和字体本来就压缩过，不要再压缩
+    androidResources {
+        noCompress.addAll(listOf("mp3", "ttf"))
     }
 }
 

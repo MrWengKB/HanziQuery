@@ -524,3 +524,19 @@ header p {
 .py-play:hover, .py-play:focus-visible { background: rgba(59,130,246,.12); }
 .py-play.playing { color: #2563eb; }
 .py-play.no-audio { opacity: .5; }
+
+/* 页脚：隐私政策链接 */
+.site-footer {
+  text-align: center;
+  margin: 32px 0 8px;
+  font-size: 12px;
+}
+
+.site-footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
