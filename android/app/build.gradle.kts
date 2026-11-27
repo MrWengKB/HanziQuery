@@ -4,13 +4,25 @@ plugins {
 
 // 把仓库根目录的网页文件复制进 App 的 assets/www，网页更新后重新打包即可同步
 val webRoot = rootProject.projectDir.parentFile
-val webAssetsDir = layout.buildDirectory.dir("webassets")
+val webFiles = listOf("index.html", "style.css", "hanzilist.csv", "*.ttf", "js/**", "audio/**", "README.md", "version-history.md", "privacy.html")
 
-val copyWeb by tasks.registering(Sync::class) {
-    from(webRoot) {
-        include("index.html", "style.css", "hanzilist.csv", "*.ttf", "js/**", "audio/**", "README.md", "version-history.md", "privacy.html")
+// direct（GitHub 的 APK）：网页原样打包，包含 Google Analytics
+val directAssetsDir = layout.buildDirectory.dir("webassets-direct")
+val copyWebDirect by tasks.registering(Sync::class) {
+    from(webRoot) { include(webFiles) }
+    into(directAssetsDir.map { it.dir("www") })
+}
+
+// play（Google Play 的 AAB）：去掉 GA-START…GA-END 之间的 Google Analytics（Play 数据安全表单申报为不收集数据）
+val playAssetsDir = layout.buildDirectory.dir("webassets-play")
+val copyWebPlay by tasks.registering(Sync::class) {
+    from(webRoot) { include(webFiles) }
+    into(playAssetsDir.map { it.dir("www") })
+    doLast {
+        playAssetsDir.get().dir("www").asFile.walkTopDown().filter { it.isFile && it.extension == "html" }.forEach { f ->
+            f.writeText(f.readText(Charsets.UTF_8).replace(Regex("""(?s)<!-- GA-START.*?<!-- GA-END -->\s*"""), ""), Charsets.UTF_8)
+        }
     }
-    into(webAssetsDir.map { it.dir("www") })
 }
 
 // 从 version-history.md 第一个 # 标题读出版本号，例如「# 更新内容 v2.5.1」→「2.5.1」
@@ -84,8 +96,11 @@ android {
     }
 
     sourceSets {
-        getByName("main") {
-            assets.srcDir(webAssetsDir.get().asFile)
+        getByName("direct") {
+            assets.srcDir(directAssetsDir.get().asFile)
+        }
+        getByName("play") {
+            assets.srcDir(playAssetsDir.get().asFile)
         }
     }
 
@@ -95,7 +110,7 @@ android {
     }
 }
 
-tasks.named("preBuild") { dependsOn(copyWeb) }
+tasks.named("preBuild") { dependsOn(copyWebDirect, copyWebPlay) }
 
 dependencies {
     implementation("androidx.webkit:webkit:1.11.0")
